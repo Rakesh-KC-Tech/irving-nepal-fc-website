@@ -2505,7 +2505,7 @@ function gameRowHTML(g){
 async function loadClubverseGames(){
   const homeSection = document.getElementById('homeResultsSection');
   try{
-    const res = await fetch(`${CLUBVERSE_API}/games?recent=8&upcoming=6`);
+    const res = await fetch(`${CLUBVERSE_API}/games?recent=50&upcoming=50`);
     if(!res.ok) throw new Error('games request failed');
     const data = await res.json();
     const recent = data.recent || [];
@@ -2529,13 +2529,23 @@ loadClubverseGames();
 function tournamentHistoryRowHTML(row){
   const r = row.record;
   const champBadge = row.champion ? '<span class="tourney-status st-live" style="margin-left:10px;"><span class="dot"></span>Champion</span>' : '';
+  const ongoingBadge = row.status && row.status !== 'COMPLETED'
+    ? '<span class="tourney-status st-upcoming" style="margin-left:10px;"><span class="dot"></span>Ongoing</span>' : '';
+  const startText = row.startDate ? new Date(row.startDate).toLocaleDateString('en-US', { month:'short', year:'numeric' }) : '';
+  const metaParts = [row.categoryName, row.stage, startText].filter(Boolean);
+  const link = row.publicSlug
+    ? `<a href="https://clubverseapp.com/t/${row.publicSlug}" target="_blank" rel="noopener" style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--crimson-2);white-space:nowrap;">View ↗</a>`
+    : '';
   return `
     <div class="cv-history-row">
       <div>
-        <div class="cv-history-name">${row.tournamentName}${champBadge}</div>
-        <div class="cv-history-meta">${row.categoryName} · ${row.stage}</div>
+        <div class="cv-history-name">${row.tournamentName}${champBadge}${ongoingBadge}</div>
+        <div class="cv-history-meta">${metaParts.join(' · ')}</div>
       </div>
-      <div class="cv-history-record">${r.won}W–${r.drawn}D–${r.lost}L <span style="color:var(--mist);font-size:15px;">(${r.goalsFor}–${r.goalsAgainst})</span></div>
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div class="cv-history-record">${r.won}W–${r.drawn}D–${r.lost}L <span style="color:var(--mist);font-size:15px;">(${r.goalsFor}–${r.goalsAgainst})</span></div>
+        ${link}
+      </div>
     </div>
   `;
 }
