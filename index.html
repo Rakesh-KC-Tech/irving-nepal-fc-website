@@ -361,28 +361,23 @@
   .sponsor-track{display:flex;gap:40px;width:max-content;animation:marquee 26s linear infinite;}
   .sponsor-marquee:hover .sponsor-track{animation-play-state:paused;}
   @keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+  /* Every sponsor logo is shown transparent, uncarded, and naturally
+     blended into the page — no white card behind any of them. Each logo's
+     own art supplies whatever contrast/shape it needs (a filled badge, a
+     plain wordmark, etc.); we never add a background of our own. */
   .sponsor-strip .s-item{
-    background:#fff;border:1px solid var(--line);padding:14px 30px;
+    background:transparent;border:none;box-shadow:none;padding:10px 16px;
     display:flex;align-items:center;justify-content:center;height:82px;box-sizing:border-box;
-    transition:transform .2s ease, box-shadow .2s ease;
   }
-  .sponsor-strip .s-item img{max-height:50px;max-width:170px;object-fit:contain;display:block;}
-  .sponsor-strip .s-item:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,0.35);}
-
-  /* Veltrix: official art already has a transparent background, so it's shown
-     without the white sponsor card, slightly larger, with a hover zoom.
-     Selectors below are made deliberately specific (repeating the base
-     classes) so they win over the general .s-item / .sp-logo card styles. */
-  .sponsor-strip .s-item.s-item--veltrix,
-  .sp-logo.sp-logo--veltrix{
-    background:transparent;border:none;box-shadow:none;padding:6px 10px;
+  .sponsor-strip .s-item img{
+    max-height:50px;max-width:170px;object-fit:contain;display:block;
+    transition:transform .25s ease, filter .25s ease;
   }
-  .s-item--veltrix img, .sp-logo--veltrix img{transition:transform .25s ease, filter .25s ease;}
+  /* Veltrix is the newest sponsor and is shown a little larger/more prominent */
   .sponsor-strip .s-item--veltrix img{max-height:60px;max-width:200px;}
   .sponsor-partners-row .sp-logo--veltrix img{max-height:48px;max-width:180px;}
   @media (hover:hover) and (pointer:fine){
-    .sponsor-strip .s-item.s-item--veltrix:hover{transform:none;box-shadow:none;}
-    .s-item--veltrix:hover img, .sp-logo--veltrix:hover img{
+    .sponsor-strip .s-item:hover img, .sp-logo:hover img{
       transform:scale(1.1);
       filter:drop-shadow(0 0 10px rgba(150,190,255,0.45));
     }
@@ -487,8 +482,8 @@
   .tier-card li{font-size:12.3px;color:var(--mist);padding-left:16px;position:relative;line-height:1.4;}
   .tier-card li::before{content:'✓';position:absolute;left:0;color:var(--gold);font-weight:700;}
   .sponsor-partners-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:22px;}
-  .sp-logo{background:#fff;border:1px solid var(--line);padding:12px 22px;display:flex;align-items:center;justify-content:center;height:64px;box-sizing:border-box;}
-  .sp-logo img{max-height:38px;max-width:140px;object-fit:contain;display:block;}
+  .sp-logo{background:transparent;border:none;box-shadow:none;padding:12px 22px;display:flex;align-items:center;justify-content:center;height:64px;box-sizing:border-box;}
+  .sp-logo img{max-height:38px;max-width:140px;object-fit:contain;display:block;transition:transform .25s ease, filter .25s ease;}
   @media(max-width:1080px){.sponsor-channels{grid-template-columns:1fr 1fr;}.sponsor-tiers{grid-template-columns:1fr 1fr;}}
   @media(max-width:640px){.sponsor-channels{grid-template-columns:1fr;}.sponsor-tiers{grid-template-columns:1fr;}}
   .tl-row{display:grid;grid-template-columns:120px 1fr;gap:30px;padding:30px 0;border-top:1px solid var(--line);}
