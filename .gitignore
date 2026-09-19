@@ -1,0 +1,4 @@
+node_modules/
+.ionos-ftp-password
+.env
+.env.local
