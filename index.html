@@ -1587,42 +1587,23 @@
   <section class="pad">
     <div class="wrap join-grid">
       <div>
-        <div class="eyebrow">Membership Plans</div>
-        <h2 style="font-size:34px;margin-bottom:26px;">Choose Your Plan</h2>
+        <div class="eyebrow">Membership</div>
+        <h2 style="font-size:34px;margin-bottom:26px;">Club Membership</h2>
 
         <div class="plan-card">
-          <h3>Supporter</h3>
-          <div class="plan-price">$40<span>/year</span></div>
-          <ul>
-            <li>Newsletter &amp; match alerts</li>
-            <li>10% shop discount</li>
-            <li>Supporter card</li>
-          </ul>
-          <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="selectPlan('Supporter — $40/yr')">Select Plan</button>
-        </div>
-
-        <div class="plan-card featured">
-          <h3>Player Membership</h3>
+          <h3>Membership</h3>
           <div class="plan-price" id="memberPlanPrice">$100<span>/year</span></div>
-          <ul>
-            <li>Full first-team eligibility</li>
-            <li>League &amp; tournament registration</li>
-            <li>Official training kit</li>
-            <li>20% shop discount</li>
+          <p id="memberPlanNote" style="color:var(--mist-dim);font-size:13px;margin-top:-14px;"></p>
+          <ul id="memberPlanBenefits">
+            <li>Weekly games with bibs, balls, cones and goal posts provided</li>
+            <li>Entry to the internal tournament</li>
+            <li>Eligibility to represent the club in interclub tournaments</li>
+            <li>Your goals, assists and ratings tracked on the club leaderboard</li>
+            <li>End-of-season awards for the season's top performers</li>
+            <li>Spending approved by the board and collection totals published to members</li>
           </ul>
-          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="selectPlan('Player Membership — $100/yr')">Select Plan</button>
-          <p id="memberPlanNote" style="color:var(--mist-dim);font-size:12px;margin-top:12px;"></p>
-        </div>
-
-        <div class="plan-card">
-          <h3>Academy (Youth)</h3>
-          <div class="plan-price">$150<span>/year</span></div>
-          <ul>
-            <li>Ages 6–16</li>
-            <li>Weekly coaching sessions</li>
-            <li>Youth match kit included</li>
-          </ul>
-          <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="selectPlan('Academy — $150/yr')">Select Plan</button>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="selectPlan('Membership')">Select Plan</button>
+          <p style="color:var(--mist-dim);font-size:12px;margin-top:14px;">Membership details are managed in ClubVerse and kept in sync here automatically.</p>
         </div>
       </div>
 
@@ -1644,9 +1625,8 @@
               <label>Plan</label>
               <select id="planSelect" required>
                 <option value="">Select a plan</option>
-                <option>Supporter — $40/yr</option>
-                <option>Player Membership — $100/yr</option>
-                <option>Academy — $150/yr</option>
+                <option value="Membership" id="planOptRegular">Membership — $100/yr</option>
+                <option value="Student Membership" id="planOptStudent">Student Membership — $50/yr</option>
               </select>
             </div>
           </div>
@@ -2606,6 +2586,14 @@ async function loadClubverseClub(){
       if(plan.dueDate) bits.push(`due ${plan.dueDate}`);
       noteEl.textContent = bits.join(' · ');
     }
+    const benefitsEl = document.getElementById('memberPlanBenefits');
+    if(benefitsEl && plan.benefits && plan.benefits.length){
+      benefitsEl.innerHTML = plan.benefits.map(b=>`<li>${b}</li>`).join('');
+    }
+    const regOpt = document.getElementById('planOptRegular');
+    if(regOpt && plan.feeAmount != null) regOpt.textContent = `Membership — $${plan.feeAmount}/yr`;
+    const studentOpt = document.getElementById('planOptStudent');
+    if(studentOpt && plan.studentFeeAmount != null) studentOpt.textContent = `Student Membership — $${plan.studentFeeAmount}/yr`;
   }catch(e){}
 }
 loadClubverseClub();
