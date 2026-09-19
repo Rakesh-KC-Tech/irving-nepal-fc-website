@@ -828,6 +828,33 @@
   @media(max-width:1080px){.tourney-teaser-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:760px){.tourney-teaser-grid{grid-template-columns:1fr;}}
 
+  /* ClubVerse live data widgets (games, tournament history) */
+  .cv-games-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  .cv-game-list{display:flex;flex-direction:column;gap:10px;}
+  .cv-game-row{
+    background:var(--panel);border:1px solid var(--line);padding:14px 18px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+  }
+  .cv-game-comp{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;color:var(--mist);text-transform:uppercase;margin-bottom:5px;}
+  .cv-game-teams{font-size:14px;display:flex;align-items:center;gap:8px;}
+  .cv-game-score{font-family:'Teko',sans-serif;font-size:22px;color:#fff;white-space:nowrap;}
+  .cv-game-result{
+    width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;flex-shrink:0;
+  }
+  .cv-game-result.W{background:rgba(46,204,113,0.15);color:#2ecc71;}
+  .cv-game-result.D{background:rgba(147,160,201,0.15);color:var(--mist);}
+  .cv-game-result.L{background:rgba(216,30,61,0.15);color:var(--crimson-2);}
+  .cv-game-date{font-size:11px;color:var(--mist);white-space:nowrap;text-align:right;}
+  .cv-history-row{
+    background:var(--panel);border:1px solid var(--line);padding:16px 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;flex-wrap:wrap;
+  }
+  .cv-history-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;}
+  .cv-history-meta{font-size:12px;color:var(--mist);margin-top:3px;}
+  .cv-history-record{font-family:'Teko',sans-serif;font-size:19px;color:#fff;white-space:nowrap;}
+  @media(max-width:760px){.cv-games-grid{grid-template-columns:1fr;}}
+
   /* Lonestar Cup popup modal */
   .lonestar-modal-overlay{
     position:fixed;inset:0;background:rgba(5,9,25,0.78);z-index:1000;
@@ -1114,6 +1141,20 @@
     </div>
   </section>
 
+  <!-- RECENT RESULTS (live from ClubVerse) -->
+  <section class="pad" style="padding-top:0;" id="homeResultsSection">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Live From ClubVerse</div>
+          <h2>Recent Results</h2>
+        </div>
+        <a href="#" class="btn btn-outline" data-nav="fixtures">All Fixtures &amp; Results</a>
+      </div>
+      <div class="cv-game-list" id="homeResultsList"></div>
+    </div>
+  </section>
+
 
   <!-- SPONSORS -->
   <section class="pad" style="padding-top:0;">
@@ -1376,6 +1417,19 @@
     </div>
   </section>
 
+  <section class="pad" style="padding-bottom:0;">
+    <div class="wrap cv-games-grid">
+      <div>
+        <h3 style="font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:16px;">Recent Results</h3>
+        <div class="cv-game-list" id="fixturesRecentList"></div>
+      </div>
+      <div>
+        <h3 style="font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:16px;">Upcoming Fixtures</h3>
+        <div class="cv-game-list" id="fixturesUpcomingList"></div>
+      </div>
+    </div>
+  </section>
+
   <section class="pad">
     <div class="wrap">
       <div class="tourney-tabs" id="tourneyTabsFixtures"></div>
@@ -1402,6 +1456,14 @@
       <div class="crumbs">Home / <span>Tournaments</span></div>
       <h1>Tournaments</h1>
       <p>Every tournament we're part of, pulled straight from ClubVerse.</p>
+    </div>
+  </section>
+
+  <section class="pad" style="padding-bottom:0;">
+    <div class="wrap">
+      <div class="eyebrow" style="margin-bottom:16px;">Tournament Record — Live From ClubVerse</div>
+      <div class="hero-stats" id="tourneyStatsRow" style="margin-bottom:36px;"></div>
+      <div id="tourneyHistoryList" style="margin-bottom:12px;"></div>
     </div>
   </section>
 
@@ -1541,7 +1603,7 @@
 
         <div class="plan-card featured">
           <h3>Player Membership</h3>
-          <div class="plan-price">$100<span>/year</span></div>
+          <div class="plan-price" id="memberPlanPrice">$100<span>/year</span></div>
           <ul>
             <li>Full first-team eligibility</li>
             <li>League &amp; tournament registration</li>
@@ -1549,6 +1611,7 @@
             <li>20% shop discount</li>
           </ul>
           <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="selectPlan('Player Membership — $100/yr')">Select Plan</button>
+          <p id="memberPlanNote" style="color:var(--mist-dim);font-size:12px;margin-top:12px;"></p>
         </div>
 
         <div class="plan-card">
@@ -2432,6 +2495,120 @@ document.getElementById('tourneyTeaserGrid').innerHTML = tournaments.map((t,idx)
     </div>
   </div>
 `).join('');
+
+/* ---------------- CLUBVERSE: LIVE GAMES, TOURNAMENT RECORD, MEMBERSHIP PLAN ---------------- */
+const CLUBVERSE_API = "https://portal.irvingnepalfc.com/api/clubverse";
+
+function formatGameDate(ms){
+  return new Date(ms).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+function gameScoreLine(g){
+  if(g.home.score == null && g.away.score == null) return g.status === 'scheduled' ? 'vs' : '—';
+  return `${g.home.score ?? '-'} – ${g.away.score ?? '-'}`;
+}
+function gameRowHTML(g){
+  const resultBadge = g.result ? `<span class="cv-game-result ${g.result}">${g.result}</span>` : '';
+  return `
+    <div class="cv-game-row">
+      <div>
+        <div class="cv-game-comp">${g.competition}${g.phase ? ' · ' + g.phase.replace(/_/g,' ') : ''}</div>
+        <div class="cv-game-teams">${resultBadge}<span>${g.home.name} vs ${g.away.name}</span></div>
+      </div>
+      <div>
+        <div class="cv-game-score">${gameScoreLine(g)}</div>
+        <div class="cv-game-date">${formatGameDate(g.date)}${g.venue ? ' · ' + g.venue : ''}</div>
+      </div>
+    </div>
+  `;
+}
+
+async function loadClubverseGames(){
+  const homeSection = document.getElementById('homeResultsSection');
+  try{
+    const res = await fetch(`${CLUBVERSE_API}/games?recent=8&upcoming=6`);
+    if(!res.ok) throw new Error('games request failed');
+    const data = await res.json();
+    const recent = data.recent || [];
+    const upcoming = data.upcoming || [];
+
+    const homeList = document.getElementById('homeResultsList');
+    if(homeList){
+      if(recent.length){ homeList.innerHTML = recent.slice(0,4).map(gameRowHTML).join(''); }
+      else if(homeSection){ homeSection.style.display = 'none'; }
+    }
+    const recentList = document.getElementById('fixturesRecentList');
+    if(recentList) recentList.innerHTML = recent.length ? recent.map(gameRowHTML).join('') : '<p class="news-empty">No recent games yet.</p>';
+    const upcomingList = document.getElementById('fixturesUpcomingList');
+    if(upcomingList) upcomingList.innerHTML = upcoming.length ? upcoming.map(gameRowHTML).join('') : '<p class="news-empty">No upcoming games scheduled.</p>';
+  }catch(e){
+    if(homeSection) homeSection.style.display = 'none';
+  }
+}
+loadClubverseGames();
+
+function tournamentHistoryRowHTML(row){
+  const r = row.record;
+  const champBadge = row.champion ? '<span class="tourney-status st-live" style="margin-left:10px;"><span class="dot"></span>Champion</span>' : '';
+  return `
+    <div class="cv-history-row">
+      <div>
+        <div class="cv-history-name">${row.tournamentName}${champBadge}</div>
+        <div class="cv-history-meta">${row.categoryName} · ${row.stage}</div>
+      </div>
+      <div class="cv-history-record">${r.won}W–${r.drawn}D–${r.lost}L <span style="color:var(--mist);font-size:15px;">(${r.goalsFor}–${r.goalsAgainst})</span></div>
+    </div>
+  `;
+}
+
+async function loadClubverseTournaments(){
+  try{
+    const res = await fetch(`${CLUBVERSE_API}/tournaments`);
+    if(!res.ok) throw new Error('tournaments request failed');
+    const data = await res.json();
+    const c = data.career;
+    if(!c) return;
+
+    const statsEl = document.getElementById('tourneyStatsRow');
+    if(statsEl){
+      statsEl.innerHTML = `
+        <div><b>${c.tournamentsPlayed}</b><span>Tournaments</span></div>
+        <div><b>${c.titles}</b><span>Titles</span></div>
+        <div><b>${c.won}-${c.drawn}-${c.lost}</b><span>Record (W-D-L)</span></div>
+        <div><b>${c.goalsFor}-${c.goalsAgainst}</b><span>Goals For-Against</span></div>
+      `;
+    }
+    const historyEl = document.getElementById('tourneyHistoryList');
+    if(historyEl){
+      historyEl.innerHTML = (c.history||[]).length
+        ? c.history.map(tournamentHistoryRowHTML).join('')
+        : '<p class="news-empty">No tournament history yet.</p>';
+    }
+  }catch(e){}
+}
+loadClubverseTournaments();
+
+async function loadClubverseClub(){
+  try{
+    const res = await fetch(`${CLUBVERSE_API}/club`);
+    if(!res.ok) throw new Error('club request failed');
+    const data = await res.json();
+    const plan = data.club && data.club.membershipPlan;
+    if(!plan) return;
+
+    const priceEl = document.getElementById('memberPlanPrice');
+    if(priceEl && plan.feeAmount != null){
+      priceEl.innerHTML = `$${plan.feeAmount}<span>/${plan.periodLabel || 'year'}</span>`;
+    }
+    const noteEl = document.getElementById('memberPlanNote');
+    if(noteEl){
+      const bits = [];
+      if(plan.studentFeeAmount != null) bits.push(`$${plan.studentFeeAmount}/yr for students`);
+      if(plan.dueDate) bits.push(`due ${plan.dueDate}`);
+      noteEl.textContent = bits.join(' · ');
+    }
+  }catch(e){}
+}
+loadClubverseClub();
 
 /* ---------------- TOURNAMENTS: HUB PAGE (tabs + real banner panel) ---------------- */
 // Creates an independent tab-bar + detail-panel controller for a given set
