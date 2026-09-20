@@ -822,6 +822,16 @@
   }
   .tourney-card-banner .tourney-status{position:absolute;top:14px;right:14px;z-index:1;}
   .tourney-card-banner .tourney-card-icon{font-size:48px;}
+  /* Tournaments without an uploaded banner image get a badge treatment
+     instead of a bare emoji floating on the gradient. */
+  .tourney-card-icon.is-fallback{
+    width:74px;height:74px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.20), rgba(255,255,255,0.05));
+    border:1px solid rgba(255,255,255,0.28);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 26px rgba(0,0,0,0.4);
+  }
+  .tourney-card-banner .tourney-card-icon.is-fallback{width:58px;height:58px;font-size:26px;}
   .tourney-card-banner .tourney-card-icon img{max-width:76px;max-height:76px;}
   .tourney-card-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:12px;flex:1;}
   .tourney-status{
@@ -2532,7 +2542,7 @@ const statusLabel = {live:"Live", upcoming:"Upcoming", completed:"Completed"};
 document.getElementById('tourneyTeaserGrid').innerHTML = tournaments.map((t,idx)=>`
   <div class="tourney-card" data-aos="fade-up" data-aos-delay="${(idx%3)*80}">
     <div class="tourney-card-banner">
-      <span class="tourney-card-icon">${t.banner ? `<img src="${t.banner}" alt="${t.name} logo">` : t.icon}</span>
+      <span class="tourney-card-icon${t.banner ? '' : ' is-fallback'}">${t.banner ? `<img src="${t.banner}" alt="${t.name} logo">` : t.icon}</span>
       <span class="tourney-status st-${t.status}"><span class="dot"></span>${statusLabel[t.status]}</span>
     </div>
     <div class="tourney-card-body">
