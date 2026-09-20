@@ -2007,19 +2007,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.js"></script>
 <script>
 /* ---------------- DATA ---------------- */
+/* Squad roster — jersey number, captain flag and the descriptive label
+   aren't tracked by ClubVerse, so they're curated here. Position is
+   resolved live from ClubVerse's member directory at render time (see
+   findClubversePosition below); posFallback is only used if ClubVerse
+   has no position on file for that name, or while it's still loading. */
 const players = [
-  {n:7,name:"Rakesh KC",pos:"FW",label:"Striker / Forward"},
-  {n:8,name:"Ashish Pokhrel",pos:"MF",label:"Midfielder / CB"},
-  {n:10,name:"Sujan Lama",pos:"FW",label:"Left Wing / Forward",captain:true},
-  {n:9,name:"Sanjaya Thapa",pos:"FW",label:"Right Wing / Forward"},
-  {n:4,name:"Sagar Kunwar",pos:"DF",label:"Left Back / Defender"},
-  {n:2,name:"Soban Sharma",pos:"DF",label:"Center Back / Defender"},
-  {n:3,name:"Safal Rijal",pos:"DF",label:"Right Back / Defender"},
-  {n:11,name:"Anish Maharjan",pos:"MF",label:"Midfielder / Forward"},
-  {n:5,name:"Arjun Subedi",pos:"FW",label:"Forward / Left Wing"},
-  {n:1,name:"Sandesh Lohani",pos:"GK",label:"Goalkeeper"},
-  {n:12,name:"Monkey D Rocky",pos:"FW",label:"Right Wing / Forward"},
-  {n:6,name:"Santos Thapa",pos:"FW",label:"Right Wing / Forward"},
+  {n:7,name:"Rakesh KC",posFallback:"FW",label:"Striker / Forward"},
+  {n:8,name:"Ashish Pokhrel",posFallback:"MF",label:"Midfielder / CB"},
+  {n:10,name:"Sujan Lama",posFallback:"FW",label:"Left Wing / Forward",captain:true},
+  {n:9,name:"Sanjaya Thapa",posFallback:"FW",label:"Right Wing / Forward"},
+  {n:4,name:"Sagar Kunwar",posFallback:"DF",label:"Left Back / Defender"},
+  {n:2,name:"Soban Sharma",posFallback:"DF",label:"Center Back / Defender"},
+  {n:3,name:"Safal Rijal",posFallback:"DF",label:"Right Back / Defender"},
+  {n:11,name:"Anish Maharjan",posFallback:"MF",label:"Midfielder / Forward"},
+  {n:5,name:"Arjun Subedi",posFallback:"FW",label:"Forward / Left Wing"},
+  {n:1,name:"Sandesh Lohani",posFallback:"GK",label:"Goalkeeper"},
+  {n:12,name:"Monkey D Rocky",posFallback:"FW",label:"Right Wing / Forward"},
+  {n:6,name:"Santos Thapa",posFallback:"FW",label:"Right Wing / Forward"},
 ];
 
 /* News is no longer hardcoded — it's pulled live from the portal's CMS
@@ -2118,6 +2123,10 @@ let teamFilter = "all";
 let clubversePhotosByName = {};
 let clubversePhotosBySortedWords = {};
 let clubversePhotosByFirstWord = {};
+let clubversePositionsByName = {};
+let clubversePositionsBySortedWords = {};
+let clubversePositionsByFirstWord = {};
+const CLUBVERSE_POSITION_MAP = {FWD:"FW",MID:"MF",DEF:"DF",GK:"GK"};
 function normalizePlayerName(s){
   return (s||'').toLowerCase().trim().replace(/\s+/g,' ');
 }
@@ -2132,11 +2141,17 @@ function findClubversePhoto(name){
     || clubversePhotosBySortedWords[sortedWordsKey(name)]
     || clubversePhotosByFirstWord[firstWord(name)];
 }
+function findClubversePosition(name){
+  return clubversePositionsByName[normalizePlayerName(name)]
+    || clubversePositionsBySortedWords[sortedWordsKey(name)]
+    || clubversePositionsByFirstWord[firstWord(name)];
+}
 
 function renderTeam(filter="all"){
   teamFilter = filter;
   const grid = document.getElementById('teamGrid');
-  grid.innerHTML = players.filter(p=>filter==="all"||p.pos===filter).map((p,idx)=>{
+  const roster = players.map(p => ({...p, pos: findClubversePosition(p.name) || p.posFallback}));
+  grid.innerHTML = roster.filter(p=>filter==="all"||p.pos===filter).map((p,idx)=>{
     const photoUrl = findClubversePhoto(p.name);
     const photoContent = photoUrl
       ? `<img src="${photoUrl}" alt="${p.name}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`
@@ -2190,6 +2205,21 @@ async function loadClubverseMemberPhotos(){
       clubversePhotosByFirstWord[fw] = m.photoUrl;
     });
     ambiguousFirstWords.forEach(fw => delete clubversePhotosByFirstWord[fw]);
+
+    const seenPosFirstWords = new Set();
+    const ambiguousPosFirstWords = new Set();
+    members.forEach(m=>{
+      const pos = m.position ? CLUBVERSE_POSITION_MAP[m.position.toUpperCase()] : null;
+      if(!pos) return;
+      clubversePositionsByName[normalizePlayerName(m.name)] = pos;
+      clubversePositionsBySortedWords[sortedWordsKey(m.name)] = pos;
+      const fw = firstWord(m.name);
+      if(seenPosFirstWords.has(fw)) ambiguousPosFirstWords.add(fw);
+      seenPosFirstWords.add(fw);
+      clubversePositionsByFirstWord[fw] = pos;
+    });
+    ambiguousPosFirstWords.forEach(fw => delete clubversePositionsByFirstWord[fw]);
+
     renderTeam(teamFilter);
 
     document.querySelectorAll('.staff-card[data-staff-name]').forEach(card=>{
