@@ -150,6 +150,13 @@
   nav.links a.active::after{
     content:'';position:absolute;left:9px;right:9px;bottom:4px;height:2px;background:var(--crimson-2);
   }
+  nav.links a.nav-login-btn{
+    display:inline-flex;align-items:center;gap:6px;color:#fff;
+    border:1px solid rgba(255,255,255,0.22);border-radius:20px;
+    padding:8px 16px;margin-left:8px;transition:background .2s,border-color .2s;
+  }
+  nav.links a.nav-login-btn:hover{background:rgba(255,255,255,0.08);border-color:#fff;}
+  nav.links a.nav-login-btn svg{flex-shrink:0;}
   .nav-cta{display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .btn{
     font-family:'Oswald',sans-serif;
@@ -1059,11 +1066,12 @@
   .app-mock .phone b{font-family:'Teko',sans-serif;font-size:26px;}
   .app-mock .phone span{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--mist);text-transform:uppercase;}
   .nav-app-btn{
-    display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);color:#fff;
+    display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.08);color:#fff;
     font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;
-    padding:10px 16px;transition:background .2s;
+    padding:10px 16px;border-radius:20px;transition:background .2s;
   }
   .nav-app-btn:hover{background:rgba(255,255,255,0.16);}
+  .nav-app-btn svg{flex-shrink:0;}
   @media(max-width:1080px){.watch-grid{grid-template-columns:1fr;}.app-grid{grid-template-columns:1fr;}.app-mock{height:280px;}}
   @media(max-width:1400px){
     .nav-app-btn{display:none;}
@@ -1153,15 +1161,14 @@
       <a href="#" data-nav="gallery">Gallery</a>
       <a href="#" data-nav="shop">Shop</a>
       <a href="#" data-nav="contact">Contact</a>
-      <a href="https://portal.irvingnepalfc.com">🔐 Member Login</a>
+      <a href="https://portal.irvingnepalfc.com" class="nav-login-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Member Login</a>
     </nav>
     <div class="nav-cta">
-      <a href="https://apps.apple.com/us/app/clubverse/id6755897769" target="_blank" rel="noopener" class="nav-app-btn">📱 Get The App</a>
+      <a href="https://apps.apple.com/us/app/clubverse/id6755897769" target="_blank" rel="noopener" class="nav-app-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><line x1="10" y1="19" x2="14" y2="19"/></svg>Get The App</a>
       <button class="btn-ghost-cart" id="cartBtn" aria-label="Open cart">
         🛒<span class="cart-count" id="cartCount">0</span>
       </button>
       <a href="#" class="btn btn-primary" data-nav="join">Join The Club</a>
-      <a href="https://portal.irvingnepalfc.com" class="nav-app-btn">🔐 Member Login</a>
       <button class="burger" id="burgerBtn" aria-label="Menu">☰</button>
     </div>
   </div>
