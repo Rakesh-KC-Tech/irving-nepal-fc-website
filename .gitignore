@@ -2,3 +2,4 @@ node_modules/
 .ionos-ftp-password
 .env
 .env.local
+stripe_backup_code.txt
