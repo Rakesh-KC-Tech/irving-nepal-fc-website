@@ -1690,18 +1690,18 @@
         <h2 style="font-size:34px;margin-bottom:26px;">Player / Member Details</h2>
         <form class="club-form" id="joinForm">
           <div class="form-row">
-            <div class="field"><label>First Name</label><input type="text" required /></div>
-            <div class="field"><label>Last Name</label><input type="text" required /></div>
+            <div class="field"><label>First Name</label><input type="text" name="firstName" required /></div>
+            <div class="field"><label>Last Name</label><input type="text" name="lastName" required /></div>
           </div>
           <div class="form-row">
-            <div class="field"><label>Email</label><input type="email" required /></div>
-            <div class="field"><label>Phone</label><input type="tel" required /></div>
+            <div class="field"><label>Email</label><input type="email" name="email" required /></div>
+            <div class="field"><label>Phone</label><input type="tel" name="phone" required /></div>
           </div>
           <div class="form-row">
-            <div class="field"><label>Date of Birth</label><input type="date" required /></div>
+            <div class="field"><label>Date of Birth</label><input type="date" name="dateOfBirth" required /></div>
             <div class="field">
               <label>Plan</label>
-              <select id="planSelect" required>
+              <select id="planSelect" name="plan" required>
                 <option value="">Select a plan</option>
                 <option value="Membership" id="planOptRegular">Membership — $100/yr</option>
                 <option value="Student Membership" id="planOptStudent">Student Membership — $50/yr</option>
@@ -1709,7 +1709,7 @@
             </div>
           </div>
           <div class="field"><label>Preferred Position</label>
-            <select>
+            <select name="preferredPosition">
               <option>Goalkeeper</option>
               <option>Defender</option>
               <option>Midfielder</option>
@@ -1717,9 +1717,9 @@
               <option>Not applicable</option>
             </select>
           </div>
-          <div class="field"><label>Notes (medical info, experience, etc.)</label><textarea></textarea></div>
+          <div class="field"><label>Notes (medical info, experience, etc.)</label><textarea name="notes"></textarea></div>
           <button type="submit" class="btn btn-primary" style="justify-content:center;margin-top:8px;">Submit Registration</button>
-          <p style="color:var(--mist-dim);font-size:12px;">Payment is collected securely after submission. You'll receive a confirmation email with next steps.</p>
+          <p id="joinFormNote" style="color:var(--mist-dim);font-size:12px;">We'll be in touch with next steps and payment details after you submit.</p>
         </form>
       </div>
     </div>
@@ -2561,17 +2561,40 @@ function showToast(msg){
   toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
 }
 
-/* ---------------- FORMS (demo — no backend wired) ---------------- */
+/* ---------------- FORMS ---------------- */
+const REGISTRATIONS_API = "https://portal.irvingnepalfc.com/api/registrations";
+
 function selectPlan(planName){
   document.getElementById('planSelect').value = planName;
   showView('join');
   showToast(`${planName} selected — fill out the form below`);
   window.scrollTo({top:0,behavior:'smooth'});
 }
-document.getElementById('joinForm').addEventListener('submit', e=>{
+document.getElementById('joinForm').addEventListener('submit', async e=>{
   e.preventDefault();
-  showToast("Registration received — confirmation email would be sent here");
-  e.target.reset();
+  const form = e.target;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const fd = new FormData(form);
+  const payload = Object.fromEntries(fd.entries());
+
+  submitBtn.disabled = true;
+  const originalLabel = submitBtn.textContent;
+  submitBtn.textContent = "Submitting…";
+  try{
+    const res = await fetch(REGISTRATIONS_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if(!res.ok) throw new Error("registration request failed");
+    showToast("Registration received — we'll be in touch soon");
+    form.reset();
+  }catch(e){
+    showToast("Something went wrong — please try again or email us directly");
+  }finally{
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalLabel;
+  }
 });
 document.getElementById('contactForm').addEventListener('submit', e=>{
   e.preventDefault();
