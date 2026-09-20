@@ -1488,23 +1488,6 @@
     </div>
   </section>
 
-  <section class="pad">
-    <div class="wrap">
-      <div class="tourney-tabs" id="tourneyTabsFixtures"></div>
-      <div class="live-panel">
-        <div class="tourney-banner" id="fixturesBanner">
-          <span class="tourney-card-icon" id="fixturesBannerIcon">🏆</span>
-          <span class="tourney-status" id="fixturesPanelBadge"></span>
-        </div>
-        <div class="live-panel-body">
-          <h3 id="fixturesPanelTitle">—</h3>
-          <p class="sub" id="fixturesPanelSub">Powered by ClubVerse</p>
-          <a href="#" target="_blank" rel="noopener" class="live-open-btn" id="fixturesOpenBtn">View Fixtures, Results &amp; Standings ↗</a>
-          <p class="embed-note">Opens ClubVerse in a new tab — full live scores, brackets and stats update there in real time.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>
 
 <!-- ===================== TOURNAMENTS ===================== -->
@@ -1525,24 +1508,6 @@
     </div>
   </section>
 
-  <section class="pad">
-    <div class="wrap">
-      <div class="tourney-tabs" id="tourneyTabs"></div>
-
-      <div class="live-panel">
-        <div class="tourney-banner" id="tourneyBanner">
-          <span class="tourney-card-icon" id="tourneyBannerIcon">🏆</span>
-          <span class="tourney-status" id="tourneyPanelBadge"></span>
-        </div>
-        <div class="live-panel-body">
-          <h3 id="tourneyPanelTitle">—</h3>
-          <p class="sub" id="tourneyPanelSub">Powered by ClubVerse</p>
-          <a href="#" target="_blank" rel="noopener" class="live-open-btn" id="tourneyOpenBtn">View Fixtures, Results &amp; Standings ↗</a>
-          <p class="embed-note">Opens ClubVerse in a new tab — full live scores, brackets and stats update there in real time.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>
 
 <!-- ===================== NEWS ===================== -->
@@ -1931,48 +1896,24 @@
   <div class="lonestar-modal">
     <div class="lonestar-modal-head">
       <span class="close-x" id="lonestarModalClose">✕</span>
-      <span class="tourney-status st-live" style="display:inline-flex;"><span class="dot"></span>Live</span>
+      <span class="tourney-status st-completed" id="lonestarStatusBadge" style="display:inline-flex;"><span class="dot"></span>Completed</span>
       <h3>4th Lonestar Cup 2026</h3>
       <p class="lm-sub">Hosted by Euless Royal Football Club (ERFC) &middot; Open Division &middot; Group Stage + Knockout</p>
       <div class="lonestar-modal-meta">
         <span>📅 Sep 12&ndash;13, 2026</span>
         <span>📍 Rolling Hills Soccer Complex, Fort Worth, TX</span>
-        <span>🏆 We're in Group C</span>
+        <span>🏆 Group C</span>
       </div>
-    </div>
-    <div class="lonestar-modal-tabs">
-      <button class="lm-tab-btn active" data-lm-tab="overview">Overview</button>
-      <button class="lm-tab-btn" data-lm-tab="fixtures">Fixtures</button>
-      <button class="lm-tab-btn" data-lm-tab="groups">Groups</button>
-      <button class="lm-tab-btn" data-lm-tab="bracket">Bracket</button>
     </div>
     <div class="lonestar-modal-body">
 
       <div class="lm-panel active" data-lm-panel="overview">
-        <div class="lm-stats-row">
-          <div class="lm-stat"><b>18</b><span>Teams</span></div>
-          <div class="lm-stat"><b>25</b><span>Matches</span></div>
-          <div class="lm-stat"><b>216</b><span>Players</span></div>
-          <div class="lm-stat"><b>886</b><span>Views</span></div>
+        <div class="lm-stats-row" id="lonestarStatsRow">
+          <div class="lm-stat"><b>—</b><span>Played</span></div>
         </div>
-        <div class="lm-h4">Our Matches &mdash; Saturday, Sep 12</div>
-        <div class="our-matches-grid">
-          <div class="our-match-card">
-            <div class="when">2:30 PM &middot; Group C</div>
-            <div class="match-teams">
-              <div class="team"><div class="team-badge">🟢</div><span>Khukuri FC</span></div>
-              <div class="vs">VS</div>
-              <div class="team"><div class="team-badge inf">🔴</div><span>Irving Nepal FC</span></div>
-            </div>
-          </div>
-          <div class="our-match-card">
-            <div class="when">4:10 PM &middot; Group C</div>
-            <div class="match-teams">
-              <div class="team"><div class="team-badge inf">🔴</div><span>Irving Nepal FC</span></div>
-              <div class="vs">VS</div>
-              <div class="team"><div class="team-badge">🔵</div><span>ERFC SPOT</span></div>
-            </div>
-          </div>
+        <div class="lm-h4">Our Results — Live From ClubVerse</div>
+        <div class="our-matches-grid" id="lonestarMatchesGrid">
+          <p class="news-empty" style="grid-column:1/-1;">Loading results…</p>
         </div>
         <div class="lm-h4">Tournament Sponsors</div>
         <div class="lonestar-sponsors" style="display:flex;gap:12px;flex-wrap:wrap;">
@@ -1980,100 +1921,8 @@
           <div class="sp-logo" style="height:60px;padding:8px 16px;"><img src="sponsor-clubverse.png" alt="ClubVerse" style="max-height:40px;"></div>
           <div class="sp-logo sp-logo--veltrix" style="height:60px;"><img src="sponsor-veltrix.png" alt="Veltrix" style="max-height:48px;max-width:170px;"></div>
         </div>
-      </div>
-
-      <div class="lm-panel" data-lm-panel="fixtures">
-        <div class="lm-h4">Group Stage &mdash; Saturday, Sep 12</div>
-        <table class="lm-fixture-table">
-          <tbody>
-            <tr><td class="lm-time">10:20 AM</td><td>ERFC RADIL vs Panda FC</td></tr>
-            <tr><td class="lm-time">10:20 AM</td><td>Metro FC vs Local Euless Football Toli</td></tr>
-            <tr><td class="lm-time">10:20 AM</td><td>Rukum Youth Club vs Dallas Gurkhas FC</td></tr>
-            <tr><td class="lm-time">10:20 AM</td><td>Royal Nepal FC vs Nepal Dallas FC</td></tr>
-            <tr><td class="lm-time">12:00 PM</td><td>ERFC RADIL vs Machhapuchhre FC</td></tr>
-            <tr><td class="lm-time">12:00 PM</td><td>Panda FC vs Metro FC</td></tr>
-            <tr><td class="lm-time">12:00 PM</td><td>Rukum Youth Club vs Jukson FC</td></tr>
-            <tr><td class="lm-time">12:00 PM</td><td>Dallas Gurkhas FC vs Royal Nepal FC</td></tr>
-            <tr><td class="lm-time">2:30 PM</td><td>Local Euless Football Toli vs Machhapuchhre FC</td></tr>
-            <tr><td class="lm-time">2:30 PM</td><td>ERFC SPOT vs Chandra Surya FC</td></tr>
-            <tr class="us"><td class="lm-time">2:30 PM</td><td>Khukuri FC vs Irving Nepal FC</td></tr>
-            <tr><td class="lm-time">2:30 PM</td><td>Nepal Dallas FC vs Jukson FC</td></tr>
-            <tr><td class="lm-time">3:20 PM</td><td>JHAPA 11 FC vs ERFC Youth</td></tr>
-            <tr><td class="lm-time">3:20 PM</td><td>Jai Nepal FC vs Mango FC</td></tr>
-            <tr><td class="lm-time">4:10 PM</td><td>Chandra Surya FC vs Khukuri FC</td></tr>
-            <tr class="us"><td class="lm-time">4:10 PM</td><td>Irving Nepal FC vs ERFC SPOT</td></tr>
-            <tr><td class="lm-time">5:00 PM</td><td>ERFC Youth vs Jai Nepal FC</td></tr>
-            <tr><td class="lm-time">5:00 PM</td><td>Mango FC vs JHAPA 11 FC</td></tr>
-          </tbody>
-        </table>
-        <div class="lm-h4">Knockout &mdash; Sunday, Sep 13</div>
-        <table class="lm-fixture-table">
-          <tbody>
-            <tr><td class="lm-time">11:00 AM</td><td>Group A Winner vs Group B Runner-up</td></tr>
-            <tr class="us"><td class="lm-time">11:00 AM</td><td>Group C Winner vs Group D Runner-up</td></tr>
-            <tr><td class="lm-time">11:00 AM</td><td>Group B Winner vs Group A Runner-up</td></tr>
-            <tr><td class="lm-time">11:00 AM</td><td>Group D Winner vs Group C Runner-up</td></tr>
-            <tr><td class="lm-time">12:00 PM</td><td>Semifinal 1</td></tr>
-            <tr><td class="lm-time">12:00 PM</td><td>Semifinal 2</td></tr>
-            <tr><td class="lm-time">4:00 PM</td><td>Final</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="lm-panel" data-lm-panel="groups">
-        <p class="group-standing-note" style="margin:0 0 20px;">Pre-tournament — every group opens level on points. Follow live scoring as matches kick off on ClubVerse.</p>
-        <div class="lm-groups-grid">
-          <div>
-            <div class="lm-h4">Group A</div>
-            <table class="standings"><thead><tr><th>#</th><th>Team</th><th>PTS</th></tr></thead><tbody>
-              <tr><td>1</td><td>JHAPA 11 FC</td><td>0</td></tr>
-              <tr><td>2</td><td>ERFC Youth</td><td>0</td></tr>
-              <tr><td>3</td><td>Jai Nepal FC</td><td>0</td></tr>
-              <tr><td>4</td><td>Mango FC</td><td>0</td></tr>
-            </tbody></table>
-          </div>
-          <div>
-            <div class="lm-h4">Group B</div>
-            <table class="standings"><thead><tr><th>#</th><th>Team</th><th>PTS</th></tr></thead><tbody>
-              <tr><td>1</td><td>ERFC RADIL</td><td>0</td></tr>
-              <tr><td>2</td><td>Panda FC</td><td>0</td></tr>
-              <tr><td>3</td><td>Metro FC</td><td>0</td></tr>
-              <tr><td>4</td><td>Local Euless Football Toli</td><td>0</td></tr>
-              <tr><td>5</td><td>Machhapuchhre FC</td><td>0</td></tr>
-            </tbody></table>
-          </div>
-          <div>
-            <div class="lm-h4">Group C &mdash; Our Group</div>
-            <table class="standings"><thead><tr><th>#</th><th>Team</th><th>PTS</th></tr></thead><tbody>
-              <tr><td>1</td><td>ERFC SPOT</td><td>0</td></tr>
-              <tr><td>2</td><td>Chandra Surya FC</td><td>0</td></tr>
-              <tr><td>3</td><td>Khukuri FC</td><td>0</td></tr>
-              <tr class="us"><td>4</td><td>Irving Nepal FC</td><td>0</td></tr>
-            </tbody></table>
-          </div>
-          <div>
-            <div class="lm-h4">Group D</div>
-            <table class="standings"><thead><tr><th>#</th><th>Team</th><th>PTS</th></tr></thead><tbody>
-              <tr><td>1</td><td>Rukum Youth Club</td><td>0</td></tr>
-              <tr><td>2</td><td>Dallas Gurkhas FC</td><td>0</td></tr>
-              <tr><td>3</td><td>Royal Nepal FC</td><td>0</td></tr>
-              <tr><td>4</td><td>Nepal Dallas FC</td><td>0</td></tr>
-              <tr><td>5</td><td>Jukson FC</td><td>0</td></tr>
-            </tbody></table>
-          </div>
-        </div>
-      </div>
-
-      <div class="lm-panel" data-lm-panel="bracket">
-        <div class="bracket-note">Quarterfinals kick off Sunday morning, semifinals at noon, and the final at 4:00 PM &mdash; all at Rolling Hills Soccer Complex. Group C's winner faces Group D's runner-up in the quarterfinal. The full interactive bracket updates automatically on ClubVerse as group results come in.</div>
-        <div class="lm-h4">Our Squad This Weekend</div>
-        <p class="lm-sub" style="margin-bottom:16px;">The same 12 carrying the crest all season &mdash; led by captain Sujan Lama.</p>
+        <p class="lm-sub" style="margin:20px 0 12px;">The squad that carried the crest into this tournament — led by captain Sujan Lama.</p>
         <a href="#" class="btn btn-outline" id="lonestarSquadLink">Meet The Squad →</a>
-      </div>
-
-      <div class="lonestar-modal-foot">
-        <a href="https://clubverseapp.com/t/4th-lonestar-cup-2026?ref=share" target="_blank" rel="noopener" class="btn btn-primary">Follow Live Scores on ClubVerse ↗</a>
-        <span class="embed-note" style="margin:0;">Live scores, brackets and stats update in real time on ClubVerse.</span>
       </div>
 
     </div>
@@ -2664,6 +2513,8 @@ function gameRowHTML(g){
   `;
 }
 
+let clubverseAllGames = [];
+
 async function loadClubverseGames(){
   const homeSection = document.getElementById('homeResultsSection');
   try{
@@ -2672,6 +2523,7 @@ async function loadClubverseGames(){
     const data = await res.json();
     const recent = data.recent || [];
     const upcoming = data.upcoming || [];
+    clubverseAllGames = recent.concat(upcoming);
 
     const homeList = document.getElementById('homeResultsList');
     if(homeList){
@@ -2682,6 +2534,7 @@ async function loadClubverseGames(){
     if(recentList) recentList.innerHTML = recent.length ? recent.map(gameRowHTML).join('') : '<p class="news-empty">No recent games yet.</p>';
     const upcomingList = document.getElementById('fixturesUpcomingList');
     if(upcomingList) upcomingList.innerHTML = upcoming.length ? upcoming.map(gameRowHTML).join('') : '<p class="news-empty">No upcoming games scheduled.</p>';
+    populateLonestarModal();
   }catch(e){
     if(homeSection) homeSection.style.display = 'none';
   }
@@ -2695,22 +2548,18 @@ function tournamentHistoryRowHTML(row){
     ? '<span class="tourney-status st-upcoming" style="margin-left:10px;"><span class="dot"></span>Ongoing</span>' : '';
   const startText = row.startDate ? new Date(row.startDate).toLocaleDateString('en-US', { month:'short', year:'numeric' }) : '';
   const metaParts = [row.categoryName, row.stage, startText].filter(Boolean);
-  const link = row.publicSlug
-    ? `<a href="https://clubverseapp.com/t/${row.publicSlug}" target="_blank" rel="noopener" style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--crimson-2);white-space:nowrap;">View ↗</a>`
-    : '';
   return `
     <div class="cv-history-row">
       <div>
         <div class="cv-history-name">${row.tournamentName}${champBadge}${ongoingBadge}</div>
         <div class="cv-history-meta">${metaParts.join(' · ')}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:18px;">
-        <div class="cv-history-record">${r.won}W–${r.drawn}D–${r.lost}L <span style="color:var(--mist);font-size:15px;">(${r.goalsFor}–${r.goalsAgainst})</span></div>
-        ${link}
-      </div>
+      <div class="cv-history-record">${r.won}W–${r.drawn}D–${r.lost}L <span style="color:var(--mist);font-size:15px;">(${r.goalsFor}–${r.goalsAgainst})</span></div>
     </div>
   `;
 }
+
+let clubverseTournamentHistory = [];
 
 async function loadClubverseTournaments(){
   try{
@@ -2719,6 +2568,7 @@ async function loadClubverseTournaments(){
     const data = await res.json();
     const c = data.career;
     if(!c) return;
+    clubverseTournamentHistory = c.history || [];
 
     const statsEl = document.getElementById('tourneyStatsRow');
     if(statsEl){
@@ -2731,13 +2581,56 @@ async function loadClubverseTournaments(){
     }
     const historyEl = document.getElementById('tourneyHistoryList');
     if(historyEl){
-      historyEl.innerHTML = (c.history||[]).length
-        ? c.history.map(tournamentHistoryRowHTML).join('')
+      historyEl.innerHTML = clubverseTournamentHistory.length
+        ? clubverseTournamentHistory.map(tournamentHistoryRowHTML).join('')
         : '<p class="news-empty">No tournament history yet.</p>';
     }
+    populateLonestarModal();
   }catch(e){}
 }
 loadClubverseTournaments();
+
+const LONESTAR_TOURNAMENT_ID = "8aOlpvO6Pj72ModK8w5c";
+
+function populateLonestarModal(){
+  const grid = document.getElementById('lonestarMatchesGrid');
+  const statsRow = document.getElementById('lonestarStatsRow');
+  const badge = document.getElementById('lonestarStatusBadge');
+  if(!grid) return;
+
+  const games = clubverseAllGames.filter(g => g.tournamentId === LONESTAR_TOURNAMENT_ID);
+  const record = clubverseTournamentHistory.find(t => t.tournamentId === LONESTAR_TOURNAMENT_ID);
+
+  if(games.length){
+    grid.innerHTML = games.map(g => `
+      <div class="our-match-card">
+        <div class="when">${new Date(g.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}${g.venue ? ' · ' + g.venue : ''}</div>
+        <div class="match-teams">
+          <div class="team"><div class="team-badge">⚽</div><span>${g.home.name}</span></div>
+          <div class="vs" style="font-family:'Teko',sans-serif;font-size:26px;color:#fff;">${g.home.score ?? '-'} – ${g.away.score ?? '-'}</div>
+          <div class="team"><div class="team-badge inf">⚽</div><span>${g.away.name}</span></div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    grid.innerHTML = '<p class="news-empty" style="grid-column:1/-1;">No match results yet.</p>';
+  }
+
+  if(record && statsRow){
+    const r = record.record;
+    statsRow.innerHTML = `
+      <div class="lm-stat"><b>${r.played}</b><span>Played</span></div>
+      <div class="lm-stat"><b>${r.won}-${r.drawn}-${r.lost}</b><span>W-D-L</span></div>
+      <div class="lm-stat"><b>${r.goalsFor}</b><span>Goals For</span></div>
+      <div class="lm-stat"><b>${r.goalsAgainst}</b><span>Goals Against</span></div>
+    `;
+  }
+  if(record && badge){
+    const isOngoing = record.status && record.status !== 'COMPLETED';
+    badge.className = 'tourney-status ' + (isOngoing ? 'st-upcoming' : 'st-completed');
+    badge.innerHTML = '<span class="dot"></span>' + (isOngoing ? 'Ongoing' : 'Completed');
+  }
+}
 
 async function loadClubverseClub(){
   try{
@@ -2847,58 +2740,15 @@ loadAnnouncementPopup();
 // so the OS intercepts navigation to it even from inside a frame — that's
 // outside what any embedding trick can control. A real banner image plus a
 // clearly-labeled external button is more reliable and looks more native.
-function createTourneyPanel(ids){
-  let activeId = tournaments[0].id;
-
-  function renderTabs(){
-    document.getElementById(ids.tabs).innerHTML = tournaments.map(t=>`
-      <button class="tourney-tab-btn ${t.id===activeId?'active':''}" onclick="${ids.selectFnName}('${t.id}')">
-        <span class="dot" style="color:${t.status==='live'?'#2ecc71':t.status==='upcoming'?'var(--gold)':'var(--mist)'}"></span>
-        ${t.name}
-      </button>
-    `).join('');
-  }
-
-  function select(id){
-    const t = tournaments.find(x=>x.id===id);
-    if(!t) return;
-    activeId = id;
-    renderTabs();
-    document.getElementById(ids.title).textContent = t.name;
-    document.getElementById(ids.sub).textContent = t.desc;
-    document.getElementById(ids.openBtn).href = t.url;
-    document.getElementById(ids.icon).innerHTML = t.banner ? `<img src="${t.banner}" alt="${t.name} logo">` : t.icon;
-    const badge = document.getElementById(ids.badge);
-    badge.className = 'tourney-status st-' + t.status;
-    badge.innerHTML = '<span class="dot"></span>' + statusLabel[t.status];
-  }
-
-  renderTabs();
-  select(activeId);
-  return select;
-}
-
-const selectTournament = createTourneyPanel({
-  tabs:'tourneyTabs', title:'tourneyPanelTitle', sub:'tourneyPanelSub',
-  openBtn:'tourneyOpenBtn', badge:'tourneyPanelBadge', icon:'tourneyBannerIcon',
-  selectFnName:'selectTournament'
-});
-
-const selectFixtureTournament = createTourneyPanel({
-  tabs:'tourneyTabsFixtures', title:'fixturesPanelTitle', sub:'fixturesPanelSub',
-  openBtn:'fixturesOpenBtn', badge:'fixturesPanelBadge', icon:'fixturesBannerIcon',
-  selectFnName:'selectFixtureTournament'
-});
-
 function goToTournament(id){
   if(id === 'lonestar'){ openLonestarModal(); return; }
-  selectTournament(id);
   showView('tournaments');
 }
 
 /* ---------------- LONESTAR CUP: MODAL POPUP ---------------- */
 const lonestarOverlay = document.getElementById('lonestarOverlay');
 function openLonestarModal(){
+  populateLonestarModal();
   lonestarOverlay.classList.add('open');
   requestAnimationFrame(()=>lonestarOverlay.classList.add('show'));
   document.body.style.overflow = 'hidden';
@@ -2914,14 +2764,6 @@ document.getElementById('lonestarSquadLink').addEventListener('click', e=>{
   e.preventDefault();
   closeLonestarModal();
   showView('team');
-});
-document.querySelectorAll('.lm-tab-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.lm-tab-btn').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.lm-panel').forEach(p=>p.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelector(`.lm-panel[data-lm-panel="${btn.dataset.lmTab}"]`).classList.add('active');
-  });
 });
 
 
