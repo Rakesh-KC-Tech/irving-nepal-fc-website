@@ -868,6 +868,40 @@
   .cv-history-record{font-family:'Teko',sans-serif;font-size:19px;color:#fff;white-space:nowrap;}
   @media(max-width:760px){.cv-games-grid{grid-template-columns:1fr;}}
 
+  /* Site announcement popup — used for admin-flagged important News
+     articles only (registration deadlines, cancellations, etc.), never
+     for routine posts. */
+  .announce-overlay{
+    position:fixed;inset:0;background:rgba(5,9,25,0.78);z-index:1100;
+    display:none;align-items:center;justify-content:center;padding:20px;
+    opacity:0;transition:opacity .25s;
+  }
+  .announce-overlay.open{display:flex;}
+  .announce-overlay.show{opacity:1;}
+  .announce-modal{
+    background:var(--navy-2);border:1px solid var(--line);max-width:460px;width:100%;
+    position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.5);overflow:hidden;
+    transform:translateY(16px);transition:transform .25s;
+  }
+  .announce-overlay.show .announce-modal{transform:translateY(0);}
+  .announce-close{
+    position:absolute;top:14px;right:14px;color:#fff;cursor:pointer;font-size:16px;
+    line-height:1;width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    background:rgba(5,9,25,0.55);border:1px solid rgba(255,255,255,0.15);z-index:2;
+  }
+  .announce-close:hover{background:var(--crimson);border-color:var(--crimson);}
+  .announce-img{width:100%;height:180px;object-fit:cover;display:block;}
+  .announce-body{padding:26px 28px 28px;}
+  .announce-tag{
+    display:inline-block;background:var(--crimson);color:#fff;font-family:'Oswald',sans-serif;
+    font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;margin-bottom:14px;
+  }
+  .announce-date{font-family:'Oswald',sans-serif;font-size:11px;color:var(--mist);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .announce-headline{font-size:24px;font-family:'Oswald',sans-serif;font-weight:600;text-transform:none;letter-spacing:0;margin-bottom:12px;line-height:1.25;}
+  .announce-excerpt{color:var(--mist);font-size:14px;line-height:1.6;margin-bottom:22px;}
+  .announce-actions{display:flex;gap:12px;flex-wrap:wrap;}
+  @media(max-width:520px){.announce-headline{font-size:20px;}}
+
   /* Lonestar Cup popup modal */
   .lonestar-modal-overlay{
     position:fixed;inset:0;background:rgba(5,9,25,0.78);z-index:1000;
@@ -1874,6 +1908,24 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ===================== ANNOUNCEMENT POPUP ===================== -->
+<div class="announce-overlay" id="announceOverlay">
+  <div class="announce-modal">
+    <span class="announce-close" id="announceCloseBtn">✕</span>
+    <div id="announceImgWrap"></div>
+    <div class="announce-body">
+      <span class="announce-tag" id="announceTag"></span>
+      <div class="announce-date" id="announceDate"></div>
+      <h3 class="announce-headline" id="announceHeadline"></h3>
+      <p class="announce-excerpt" id="announceExcerpt"></p>
+      <div class="announce-actions">
+        <a href="#" target="_blank" rel="noopener" class="btn btn-primary" id="announceReadMore">Read More</a>
+        <button class="btn btn-outline" id="announceDismissBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== LONESTAR CUP POPUP ===================== -->
 <div class="lonestar-modal-overlay" id="lonestarOverlay">
   <div class="lonestar-modal">
@@ -2727,6 +2779,66 @@ async function loadClubverseClub(){
 }
 loadClubverseClub();
 loadClubverseMemberPhotos();
+
+/* ---------------- SITE ANNOUNCEMENT POPUP ---------------- */
+const ANNOUNCEMENT_API = "https://portal.irvingnepalfc.com/api/news/announcement";
+const ANNOUNCE_DISMISS_KEY = "infc_dismissed_announcements";
+
+function getDismissedAnnouncements(){
+  try{ return JSON.parse(sessionStorage.getItem(ANNOUNCE_DISMISS_KEY) || "[]"); }
+  catch(e){ return []; }
+}
+function markAnnouncementDismissed(id){
+  try{
+    const dismissed = getDismissedAnnouncements();
+    if(!dismissed.includes(id)){
+      dismissed.push(id);
+      sessionStorage.setItem(ANNOUNCE_DISMISS_KEY, JSON.stringify(dismissed));
+    }
+  }catch(e){}
+}
+
+async function loadAnnouncementPopup(){
+  try{
+    const res = await fetch(ANNOUNCEMENT_API);
+    if(!res.ok) return;
+    const data = await res.json();
+    const a = data.announcement;
+    if(!a) return;
+    if(getDismissedAnnouncements().includes(a.id)) return;
+
+    document.getElementById('announceTag').textContent = a.category;
+    document.getElementById('announceDate').textContent = a.published_at
+      ? new Date(a.published_at).toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' })
+      : '';
+    document.getElementById('announceHeadline').textContent = a.headline;
+    document.getElementById('announceExcerpt').textContent = a.excerpt;
+    document.getElementById('announceReadMore').href = a.url;
+    document.getElementById('announceImgWrap').innerHTML = a.featured_image_url
+      ? `<img class="announce-img" src="${a.featured_image_url}" alt="">`
+      : '';
+
+    const overlay = document.getElementById('announceOverlay');
+    function dismissAnnouncement(){
+      overlay.classList.remove('show');
+      setTimeout(()=>overlay.classList.remove('open'), 250);
+      markAnnouncementDismissed(a.id);
+      document.removeEventListener('keydown', onEscape);
+    }
+    function onEscape(e){ if(e.key === 'Escape') dismissAnnouncement(); }
+
+    document.getElementById('announceCloseBtn').onclick = dismissAnnouncement;
+    document.getElementById('announceDismissBtn').onclick = dismissAnnouncement;
+    overlay.onclick = (e)=>{ if(e.target === overlay) dismissAnnouncement(); };
+    document.addEventListener('keydown', onEscape);
+
+    setTimeout(()=>{
+      overlay.classList.add('open');
+      requestAnimationFrame(()=>overlay.classList.add('show'));
+    }, 900);
+  }catch(e){}
+}
+loadAnnouncementPopup();
 
 /* ---------------- TOURNAMENTS: HUB PAGE (tabs + real banner panel) ---------------- */
 // Creates an independent tab-bar + detail-panel controller for a given set
