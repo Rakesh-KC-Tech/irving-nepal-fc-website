@@ -532,6 +532,19 @@
   .staff-card h4{font-family:'Oswald',sans-serif;font-size:16px;text-transform:none;font-weight:600;}
   .staff-card span{color:var(--mist);font-size:12px;letter-spacing:1px;text-transform:uppercase;}
 
+  .cv-member-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;}
+  .cv-member-card{background:var(--panel);border:1px solid var(--line);padding:16px 10px;text-align:center;}
+  .cv-member-photo{
+    width:64px;height:64px;border-radius:50%;margin:0 auto 12px;overflow:hidden;
+    background:linear-gradient(160deg,var(--navy-3),var(--royal));
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+  }
+  .cv-member-photo img{width:100%;height:100%;object-fit:cover;}
+  .cv-member-card h4{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;margin-bottom:4px;}
+  .cv-member-card span{color:var(--mist);font-size:10px;letter-spacing:1px;text-transform:uppercase;}
+  @media(max-width:1080px){.cv-member-grid{grid-template-columns:repeat(4,1fr);}}
+  @media(max-width:640px){.cv-member-grid{grid-template-columns:repeat(3,1fr);}}
+
   /* ===== FIXTURES ===== */
   .tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:40px;}
   .tab-btn{
@@ -1096,7 +1109,7 @@
           <div><b data-countup="2022" data-suffix="">2022</b><span>Founded</span></div>
           <div><b data-countup="68" data-suffix="">0</b><span>Matches Played</span></div>
           <div><b data-countup="41" data-suffix="">0</b><span>Wins</span></div>
-          <div><b data-countup="90" data-suffix="+">0+</b><span>Registered Players</span></div>
+          <div><b data-countup="90" data-suffix="+" id="memberCountStat1">0+</b><span>Registered Players</span></div>
         </div>
       </div>
       <div class="hero-crest" data-aos="zoom-in" data-aos-delay="150">
@@ -1108,7 +1121,7 @@
         </div>
         <div class="floating-card card-2">
           <div class="fc-icon">🤝</div>
-          <div class="fc-info"><b>90+</b><span>Community Players</span></div>
+          <div class="fc-info"><b id="memberCountStat2">90+</b><span>Community Players</span></div>
         </div>
       </div>
     </div>
@@ -1122,7 +1135,7 @@
     <div class="wrap stats-grid">
       <div class="stat-card"><span class="stat-icon">⚽</span><b data-countup="68">0</b><p>Matches Played</p></div>
       <div class="stat-card"><span class="stat-icon">🏆</span><b data-countup="41">0</b><p>Total Wins</p></div>
-      <div class="stat-card"><span class="stat-icon">🤝</span><b data-countup="90" data-suffix="+">0+</b><p>Active Players</p></div>
+      <div class="stat-card"><span class="stat-icon">🤝</span><b data-countup="90" data-suffix="+" id="memberCountStat3">0+</b><p>Active Players</p></div>
       <div class="stat-card"><span class="stat-icon">🎓</span><b data-countup="3">0</b><p>Youth Academy Squads</p></div>
     </div>
   </section>
@@ -1396,13 +1409,24 @@
     <div class="wrap">
       <div class="sec-head"><div><div class="eyebrow">Leadership</div><h2>Coaches &amp; Management</h2></div></div>
       <div class="staff-grid">
-        <div class="staff-card"><div class="staff-photo">🧑‍💼</div><div><h4>Sagar Babu Regmi</h4><span>Head Coach</span></div></div>
+        <div class="staff-card" data-staff-name="Sagar Babu Regmi"><div class="staff-photo">🧑‍💼</div><div><h4>Sagar Babu Regmi</h4><span>Head Coach</span></div></div>
         <div class="staff-card"><div class="staff-photo">🧑‍🏫</div><div><h4>TBD</h4><span>Assistant Coach</span></div></div>
-        <div class="staff-card"><div class="staff-photo">🧑‍💼</div><div><h4>Rob Lama</h4><span>Club President</span></div></div>
+        <div class="staff-card" data-staff-name="Rob Lama"><div class="staff-photo">🧑‍💼</div><div><h4>Rob Lama</h4><span>Club President</span></div></div>
         <div class="staff-card"><div class="staff-photo">🧑‍🎓</div><div><h4>TBD</h4><span>Academy Director</span></div></div>
         <div class="staff-card"><div class="staff-photo">🧑‍⚕️</div><div><h4>TBD</h4><span>Team Physiotherapist</span></div></div>
-        <div class="staff-card"><div class="staff-photo">🧑‍💼</div><div><h4>Ankit Neupane</h4><span>Team Manager</span></div></div>
+        <div class="staff-card" data-staff-name="Ankit Neupane"><div class="staff-photo">🧑‍💼</div><div><h4>Ankit Neupane</h4><span>Team Manager</span></div></div>
       </div>
+    </div>
+  </section>
+
+  <!-- FULL CLUB DIRECTORY (live from ClubVerse) -->
+  <section class="pad" style="padding-top:0;" id="clubDirectorySection">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><div class="eyebrow">Live From ClubVerse</div><h2>Full Club Directory</h2></div>
+        <span class="sub" id="clubDirectoryCount" style="color:var(--mist);font-size:13px;"></span>
+      </div>
+      <div class="cv-member-grid" id="clubDirectoryGrid"></div>
     </div>
   </section>
 </main>
@@ -2126,14 +2150,20 @@ document.getElementById('burgerBtn').addEventListener('click', ()=>{
 let teamFilter = "all";
 let clubversePhotosByName = {};
 let clubversePhotosBySortedWords = {};
+let clubversePhotosByFirstWord = {};
 function normalizePlayerName(s){
   return (s||'').toLowerCase().trim().replace(/\s+/g,' ');
 }
 function sortedWordsKey(s){
   return normalizePlayerName(s).split(' ').sort().join(' ');
 }
+function firstWord(s){
+  return normalizePlayerName(s).split(' ')[0] || '';
+}
 function findClubversePhoto(name){
-  return clubversePhotosByName[normalizePlayerName(name)] || clubversePhotosBySortedWords[sortedWordsKey(name)];
+  return clubversePhotosByName[normalizePlayerName(name)]
+    || clubversePhotosBySortedWords[sortedWordsKey(name)]
+    || clubversePhotosByFirstWord[firstWord(name)];
 }
 
 function renderTeam(filter="all"){
@@ -2160,18 +2190,64 @@ function renderTeam(filter="all"){
   }).join('');
 }
 
+function memberDirectoryCardHTML(m){
+  const initial = (m.name||'?').trim().charAt(0).toUpperCase() || '?';
+  const photoContent = m.photoUrl
+    ? `<img src="${m.photoUrl}" alt="${m.name}">`
+    : initial;
+  const roleLabel = m.role === 'board' ? 'Board' : (m.position ? m.position.toUpperCase() : 'Member');
+  return `
+    <div class="cv-member-card">
+      <div class="cv-member-photo">${photoContent}</div>
+      <h4>${m.name}</h4>
+      <span>${roleLabel}</span>
+    </div>
+  `;
+}
+
 async function loadClubverseMemberPhotos(){
   try{
     const res = await fetch(`${CLUBVERSE_API}/members`);
     if(!res.ok) throw new Error('members request failed');
     const data = await res.json();
-    (data.members || []).forEach(m=>{
+    const members = data.members || [];
+    const seenFirstWords = new Set();
+    const ambiguousFirstWords = new Set();
+    members.forEach(m=>{
       if(!m.photoUrl) return;
       clubversePhotosByName[normalizePlayerName(m.name)] = m.photoUrl;
       clubversePhotosBySortedWords[sortedWordsKey(m.name)] = m.photoUrl;
+      const fw = firstWord(m.name);
+      if(seenFirstWords.has(fw)) ambiguousFirstWords.add(fw);
+      seenFirstWords.add(fw);
+      clubversePhotosByFirstWord[fw] = m.photoUrl;
     });
+    ambiguousFirstWords.forEach(fw => delete clubversePhotosByFirstWord[fw]);
     renderTeam(teamFilter);
-  }catch(e){}
+
+    document.querySelectorAll('.staff-card[data-staff-name]').forEach(card=>{
+      const photoUrl = findClubversePhoto(card.dataset.staffName);
+      if(photoUrl){
+        card.querySelector('.staff-photo').innerHTML = `<img src="${photoUrl}" alt="${card.dataset.staffName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      }
+    });
+
+    const dirGrid = document.getElementById('clubDirectoryGrid');
+    const dirCount = document.getElementById('clubDirectoryCount');
+    const dirSection = document.getElementById('clubDirectorySection');
+    if(dirGrid){
+      if(members.length){
+        const sorted = [...members].sort((a,b)=> (a.role===b.role?0:a.role==='board'?-1:1) || a.name.localeCompare(b.name));
+        dirGrid.innerHTML = sorted.map(memberDirectoryCardHTML).join('');
+        if(dirCount) dirCount.textContent = `${data.total ?? members.length} members`;
+      } else if(dirSection){
+        dirSection.style.display = 'none';
+      }
+    }
+  }catch(e){
+    const dirSection = document.getElementById('clubDirectorySection');
+    if(dirSection) dirSection.style.display = 'none';
+  }
 }
 renderTeam();
 document.querySelectorAll('.filter-btn').forEach(btn=>{
@@ -2616,7 +2692,16 @@ async function loadClubverseClub(){
     const res = await fetch(`${CLUBVERSE_API}/club`);
     if(!res.ok) throw new Error('club request failed');
     const data = await res.json();
-    const plan = data.club && data.club.membershipPlan;
+    const club = data.club;
+    if(club && club.memberCount != null){
+      const text = `${club.memberCount}+`;
+      ['memberCountStat1','memberCountStat2','memberCountStat3'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el) el.textContent = text;
+      });
+    }
+
+    const plan = club && club.membershipPlan;
     if(!plan) return;
 
     const priceEl = document.getElementById('memberPlanPrice');
