@@ -2683,23 +2683,10 @@ async function loadClubverseClub(){
 loadClubverseClub();
 loadClubverseMemberPhotos();
 
-/* ---------------- SITE ANNOUNCEMENT POPUP ---------------- */
+/* ---------------- SITE ANNOUNCEMENT POPUP ----------------
+   Shows on every page load/reload — closing it only dismisses the
+   current view, it comes back on the next refresh or visit. */
 const ANNOUNCEMENT_API = "https://portal.irvingnepalfc.com/api/news/announcement";
-const ANNOUNCE_DISMISS_KEY = "infc_dismissed_announcements";
-
-function getDismissedAnnouncements(){
-  try{ return JSON.parse(sessionStorage.getItem(ANNOUNCE_DISMISS_KEY) || "[]"); }
-  catch(e){ return []; }
-}
-function markAnnouncementDismissed(id){
-  try{
-    const dismissed = getDismissedAnnouncements();
-    if(!dismissed.includes(id)){
-      dismissed.push(id);
-      sessionStorage.setItem(ANNOUNCE_DISMISS_KEY, JSON.stringify(dismissed));
-    }
-  }catch(e){}
-}
 
 async function loadAnnouncementPopup(){
   try{
@@ -2708,7 +2695,6 @@ async function loadAnnouncementPopup(){
     const data = await res.json();
     const a = data.announcement;
     if(!a) return;
-    if(getDismissedAnnouncements().includes(a.id)) return;
 
     document.getElementById('announceTag').textContent = a.category;
     document.getElementById('announceDate').textContent = a.published_at
@@ -2725,7 +2711,6 @@ async function loadAnnouncementPopup(){
     function dismissAnnouncement(){
       overlay.classList.remove('show');
       setTimeout(()=>overlay.classList.remove('open'), 250);
-      markAnnouncementDismissed(a.id);
       document.removeEventListener('keydown', onEscape);
     }
     function onEscape(e){ if(e.key === 'Escape') dismissAnnouncement(); }
