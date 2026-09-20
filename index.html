@@ -2064,34 +2064,46 @@ const gear = [
 ];
 
 /* Tournament links come straight from ClubVerse — add a new entry here any time
-   there's a new tournament and it'll show up on the site automatically, live. */
+   there's a new tournament and it'll show up on the site automatically, live.
+   Name, description, banner and URL are curated here since ClubVerse doesn't
+   expose editorial copy or images for tournaments. Status (live/upcoming/
+   completed) is resolved live from ClubVerse via tournamentId once that
+   tournament has recorded match data (see resolveTournamentStatus) —
+   statusFallback is only used before that data loads, or for tournaments
+   ClubVerse has no record of yet (no games played). */
 const tournaments = [
   {
-    id:"lonestar", name:"4th Lonestar Cup 2026", status:"live", icon:"🏆", banner:"tourney-lonestar.jpg",
+    id:"lonestar", tournamentId:"8aOlpvO6Pj72ModK8w5c", name:"4th Lonestar Cup 2026", statusFallback:"live", icon:"🏆", banner:"tourney-lonestar.jpg",
     desc:"Ongoing tournament — follow live fixtures, results and standings on ClubVerse.",
     url:"https://clubverseapp.com/t/4th-lonestar-cup-2026?ref=share"
   },
   {
-    id:"rsa", name:"RSA Cup", status:"live", icon:"🤝", banner:"tourney-rsa.jpg",
+    id:"rsa", tournamentId:"m6FbF0q8RkPbk5vHH5x8", name:"RSA Cup", statusFallback:"live", icon:"🤝", banner:"tourney-rsa.jpg",
     desc:"Brotherhood Soccer Tournament with ERFC and Blackthorn United, hosted by Rumba Soccer Academy at River Legacy Parks, Arlington.",
     url:"https://clubverseapp.com/t/rsa-cup-2026?ref=share"
   },
   {
-    id:"haslet", name:"Haslet Super League S1", status:"live", icon:"⚽",
+    id:"haslet", tournamentId:"IPzokgfaaCyTbkSBE7yr", name:"Haslet Super League S1", statusFallback:"live", icon:"⚽",
     desc:"7v7 league hosted by Back Again FC.",
     url:"https://clubverseapp.com/t/haslet-super-league-2026-ipzokg?ref=share"
   },
   {
-    id:"bst", name:"BST Winter League 2027", status:"upcoming", icon:"🥅",
+    id:"bst", name:"BST Winter League 2027", statusFallback:"upcoming", icon:"🥅",
     desc:"Indoor futsal league.",
     url:"https://clubverseapp.com/t/bst-winter-league-2027-2026?ref=share"
   },
   {
-    id:"fundraiser", name:"Fundraiser Cup — Play For Bimal", status:"completed", icon:"❤️", banner:"tourney-fundraiser.png",
+    id:"fundraiser", tournamentId:"jEg3scFVNPVFFvUXb5b0", name:"Fundraiser Cup — Play For Bimal", statusFallback:"completed", icon:"❤️", banner:"tourney-fundraiser.png",
     desc:"A community fundraiser tournament played on Aug 8, 2026, raising money for Bimal, a member of our Nepali community, and his cancer treatment.",
     url:"https://clubverseapp.com/t/fundraiser-cup-2026?ref=share"
   },
 ];
+let clubverseTournamentHistory = [];
+function resolveTournamentStatus(t){
+  const row = clubverseTournamentHistory.find(h => h.tournamentId === t.tournamentId);
+  if(!row || !row.status) return t.statusFallback;
+  return row.status === 'COMPLETED' ? 'completed' : 'live';
+}
 
 /* ---------------- NAV / VIEW ROUTING ---------------- */
 const views = ["home","about","team","fixtures","tournaments","news","gallery","shop","join","contact"];
@@ -2569,19 +2581,25 @@ document.getElementById('newsletterForm').addEventListener('submit', e=>{
 
 /* ---------------- TOURNAMENTS: TEASER GRID (Home) ---------------- */
 const statusLabel = {live:"Live", upcoming:"Upcoming", completed:"Completed"};
-document.getElementById('tourneyTeaserGrid').innerHTML = tournaments.map((t,idx)=>`
-  <div class="tourney-card" data-aos="fade-up" data-aos-delay="${(idx%3)*80}">
-    <div class="tourney-card-banner">
-      <span class="tourney-card-icon${t.banner ? '' : ' is-fallback'}">${t.banner ? `<img src="${t.banner}" alt="${t.name} logo">` : t.icon}</span>
-      <span class="tourney-status st-${t.status}"><span class="dot"></span>${statusLabel[t.status]}</span>
+function renderTourneyTeaserGrid(){
+  document.getElementById('tourneyTeaserGrid').innerHTML = tournaments.map((t,idx)=>{
+    const status = resolveTournamentStatus(t);
+    return `
+    <div class="tourney-card" data-aos="fade-up" data-aos-delay="${(idx%3)*80}">
+      <div class="tourney-card-banner">
+        <span class="tourney-card-icon${t.banner ? '' : ' is-fallback'}">${t.banner ? `<img src="${t.banner}" alt="${t.name} logo">` : t.icon}</span>
+        <span class="tourney-status st-${status}"><span class="dot"></span>${statusLabel[status]}</span>
+      </div>
+      <div class="tourney-card-body">
+        <h4>${t.icon} ${t.name}</h4>
+        <p>${t.desc}</p>
+        <a href="#" onclick="goToTournament('${t.id}');return false;">View Details →</a>
+      </div>
     </div>
-    <div class="tourney-card-body">
-      <h4>${t.icon} ${t.name}</h4>
-      <p>${t.desc}</p>
-      <a href="#" onclick="goToTournament('${t.id}');return false;">View Details →</a>
-    </div>
-  </div>
-`).join('');
+  `;
+  }).join('');
+}
+renderTourneyTeaserGrid();
 
 /* ---------------- CLUBVERSE: LIVE GAMES, TOURNAMENT RECORD, MEMBERSHIP PLAN ---------------- */
 const CLUBVERSE_API = "https://portal.irvingnepalfc.com/api/clubverse";
@@ -2676,8 +2694,6 @@ function tournamentHistoryRowHTML(row){
   `;
 }
 
-let clubverseTournamentHistory = [];
-
 async function loadClubverseTournaments(){
   try{
     const res = await fetch(`${CLUBVERSE_API}/tournaments`);
@@ -2686,6 +2702,7 @@ async function loadClubverseTournaments(){
     const c = data.career;
     if(!c) return;
     clubverseTournamentHistory = c.history || [];
+    renderTourneyTeaserGrid();
 
     const statsEl = document.getElementById('tourneyStatsRow');
     if(statsEl){
