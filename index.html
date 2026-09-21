@@ -1035,6 +1035,11 @@
     transition:transform .2s ease;
   }
   .yt-subscribe:hover{transform:translateY(-2px);}
+  .watch-dual-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  .watch-card .eyebrow{margin-bottom:14px;}
+  .watch-card h3{font-size:24px;margin-bottom:10px;}
+  .watch-card p{color:var(--mist);font-size:14px;line-height:1.6;margin:14px 0 20px;}
+  @media(max-width:1080px){.watch-dual-grid{grid-template-columns:1fr;}}
 
   /* ===== APP PROMO ===== */
   .app-band{
@@ -1302,16 +1307,28 @@
 
   <!-- WATCH / YOUTUBE -->
   <section class="pad" style="padding-top:0;">
-    <div class="wrap watch-grid">
-      <div class="video-wrap">
-        <iframe src="https://www.youtube.com/embed/videoseries?list=UUg6iqyuu_chL1T2B4FsbVOg"
-          title="Irving Nepal FC on YouTube" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-      </div>
-      <div class="watch-side">
-        <div class="eyebrow">On YouTube</div>
-        <h2 style="font-size:36px;margin-bottom:16px;">Match Highlights &amp; Behind The Scenes</h2>
-        <p>Full match highlights, goal reels, training clips, and community events — subscribe to catch every upload from the club.</p>
-        <a href="https://youtube.com/@irvingnepalfc" target="_blank" rel="noopener" class="yt-subscribe">▶ Subscribe on YouTube</a>
+    <div class="wrap">
+      <div class="eyebrow" style="margin-bottom:16px;">On YouTube</div>
+      <h2 style="font-size:36px;margin-bottom:36px;">Match Highlights &amp; Behind The Scenes</h2>
+      <div class="watch-dual-grid">
+        <div class="watch-card">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/videoseries?list=UUg6iqyuu_chL1T2B4FsbVOg"
+              title="Irving Nepal FC on YouTube" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <h3>Irving Nepal FC</h3>
+          <p>Full match highlights, goal reels, training clips, and community events straight from the club.</p>
+          <a href="https://youtube.com/@irvingnepalfc" target="_blank" rel="noopener" class="yt-subscribe">▶ Subscribe on YouTube</a>
+        </div>
+        <div class="watch-card">
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/videoseries?list=UUmXKYDgofmgAjr-0xrLlF8A"
+              title="ClubVerse on YouTube" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <h3>ClubVerse</h3>
+          <p>Our tournament and league management partner — coverage from the wider ClubVerse community, including our own matches.</p>
+          <a href="https://youtube.com/@clubverseapp" target="_blank" rel="noopener" class="yt-subscribe">▶ Subscribe on YouTube</a>
+        </div>
       </div>
     </div>
   </section>
