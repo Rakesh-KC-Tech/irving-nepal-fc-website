@@ -2604,6 +2604,12 @@ document.getElementById('joinForm').addEventListener('submit', async e=>{
       body: JSON.stringify(payload),
     });
     if(!res.ok) throw new Error("registration request failed");
+    const data = await res.json();
+    if(data.checkoutUrl){
+      showToast("Registration received — redirecting you to payment…");
+      window.location.href = data.checkoutUrl;
+      return;
+    }
     showToast("Registration received — we'll be in touch soon");
     form.reset();
   }catch(e){
@@ -3076,6 +3082,22 @@ showView = function(name){
   }
   if(orderStatus){
     params.delete('store_order');
+    const clean = location.pathname + (params.toString() ? '?'+params.toString() : '');
+    history.replaceState(null, '', clean);
+  }
+})();
+
+/* ---------------- JOIN: RETURN FROM STRIPE CHECKOUT ---------------- */
+(function(){
+  const params = new URLSearchParams(location.search);
+  const regStatus = params.get('registration');
+  if(regStatus === 'success'){
+    showToast("🎉 Payment received — welcome to the club! We'll be in touch soon.");
+  } else if(regStatus === 'cancelled'){
+    showToast("Payment cancelled — your registration is saved, but not yet paid. You can try again anytime.");
+  }
+  if(regStatus){
+    params.delete('registration');
     const clean = location.pathname + (params.toString() ? '?'+params.toString() : '');
     history.replaceState(null, '', clean);
   }
