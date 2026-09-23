@@ -3027,8 +3027,12 @@ if(window.Typed){
 
 /* ---------------- TESTIMONIALS SWIPER ---------------- */
 if(window.Swiper){
+  // Only 4 real testimonials — true loop mode needs roughly 2x the
+  // visible slide count to loop seamlessly, which breaks at 3-per-view.
+  // "rewind" gives the same cycle-back-to-the-start behavior without
+  // that slide-count requirement, so it works at every breakpoint.
   new Swiper('.testiSwiper', {
-    slidesPerView: 1, spaceBetween: 24, loop: true,
+    slidesPerView: 1, spaceBetween: 24, rewind: true,
     autoplay: { delay: 4500 },
     pagination: { el: '.swiper-pagination', clickable: true },
     breakpoints: { 768:{slidesPerView:2}, 1080:{slidesPerView:3} }
