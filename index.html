@@ -496,6 +496,12 @@
     position:absolute;bottom:10px;left:10px;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;
     text-transform:uppercase;color:var(--mist);background:rgba(0,0,0,0.5);padding:4px 8px;transition:opacity 0.6s ease;
   }
+  .crest-fade-sound{
+    position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;
+    background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:2;
+  }
+  .crest-fade-sound:hover{background:rgba(0,0,0,0.7);}
   @media (prefers-reduced-motion: reduce){
     .crest-fade-img{transition:none;animation:none;}
     .crest-fade-label{transition:none;}
@@ -1470,6 +1476,8 @@
             <img class="crest-fade-img crest-fade-old" src="https://portal.irvingnepalfc.com/old-crest-2022-2026.png" alt="Irving Nepal FC's original crest, worn from 2022 to 2026">
             <img class="crest-fade-img crest-fade-new" src="https://portal.irvingnepalfc.com/crest.png" alt="Irving Nepal FC's current crest, worn since 2026">
             <span class="crest-fade-label" id="crestFadeLabel">2022–2026</span>
+            <button class="crest-fade-sound" id="crestSoundBtn" type="button" aria-pressed="false" aria-label="Play theme music">🔇</button>
+            <audio id="crestAudio" src="https://portal.irvingnepalfc.com/crest-theme.mp3" loop preload="none"></audio>
           </div>
         </div>
       </div>
@@ -3104,6 +3112,32 @@ if(window.Swiper){
   if(!reduceMotion){
     setInterval(toggle, 7000);
   }
+
+  const soundBtn = document.getElementById('crestSoundBtn');
+  const audio = document.getElementById('crestAudio');
+  if(soundBtn && audio){
+    soundBtn.addEventListener('click', ()=>{
+      if(audio.paused){
+        audio.play().catch(()=>{});
+      } else {
+        audio.pause();
+      }
+    });
+    audio.addEventListener('play', ()=>{
+      soundBtn.textContent = '🔊';
+      soundBtn.setAttribute('aria-pressed', 'true');
+      soundBtn.setAttribute('aria-label', 'Pause theme music');
+    });
+    audio.addEventListener('pause', ()=>{
+      soundBtn.textContent = '🔇';
+      soundBtn.setAttribute('aria-pressed', 'false');
+      soundBtn.setAttribute('aria-label', 'Play theme music');
+    });
+    // Don't let the theme keep playing once the visitor leaves the About page.
+    window.addEventListener('crestFadeViewChanged', (e)=>{
+      if(e.detail !== 'about' && !audio.paused) audio.pause();
+    });
+  }
 })();
 
 /* ---------------- FAQ ACCORDION ---------------- */
@@ -3126,6 +3160,7 @@ showView = function(name){
   setTimeout(()=>{
     activeView.querySelectorAll('[data-aos]').forEach(el=>el.classList.add('aos-animate'));
   }, 400);
+  window.dispatchEvent(new CustomEvent('crestFadeViewChanged', { detail: name }));
 };
 
 /* ---------------- STORE: RETURN FROM STRIPE CHECKOUT ---------------- */
