@@ -587,23 +587,59 @@
   @media(max-width:1080px){.cv-member-grid{grid-template-columns:repeat(4,1fr);}}
   @media(max-width:640px){.cv-member-grid{grid-template-columns:repeat(3,1fr);}}
 
-  /* ===== FIXTURES ===== */
-  .tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:40px;}
-  .tab-btn{
+  /* ===== FIXTURES: MATCH CENTER ===== */
+  .match-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:32px;}
+  .match-tab-btn{
     font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;
-    padding:16px 26px;color:var(--mist);border-bottom:2px solid transparent;transition:all .2s;background:none;
+    padding:14px 24px;color:var(--mist);border-bottom:2px solid transparent;transition:all .2s;background:none;cursor:pointer;
   }
-  .tab-btn.active{color:var(--white);border-color:var(--crimson-2);}
-  .fixture-list-row{
-    display:grid;grid-template-columns:100px 1fr 120px 140px;align-items:center;gap:20px;
-    padding:22px 0;border-bottom:1px solid var(--line);
+  .match-tab-btn.active{color:var(--white);border-color:var(--crimson-2);}
+  .match-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+  .match-card{
+    background:var(--panel);border:1px solid var(--line);padding:22px 20px 18px;position:relative;overflow:hidden;
   }
-  .fixture-list-row .fdate{font-family:'Oswald',sans-serif;color:var(--mist);font-size:13px;line-height:1.5;}
-  .fixture-list-row .fdate b{display:block;color:#fff;font-size:22px;font-family:'Teko',sans-serif;}
-  .fixture-teams{display:flex;align-items:center;gap:14px;font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:0.5px;}
-  .fixture-teams .vso{color:var(--mist-dim);font-size:12px;}
-  .fixture-loc{color:var(--mist);font-size:13px;}
-  .fixture-score{font-family:'Teko',sans-serif;font-size:26px;text-align:right;}
+  .match-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--crimson),var(--gold));
+  }
+  .match-card-comp{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mist);
+    margin-bottom:18px;
+  }
+  .match-live-pill{
+    display:inline-flex;align-items:center;gap:6px;background:rgba(216,30,61,0.15);color:var(--crimson-2);
+    padding:3px 10px;border-radius:20px;font-size:10px;letter-spacing:1px;flex-shrink:0;
+  }
+  .match-live-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--crimson-2);animation:matchLivePulse 1.4s infinite;}
+  @keyframes matchLivePulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
+  .match-card-body{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .match-side{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;min-width:0;}
+  .match-side-badge{
+    width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:var(--navy-2);border:1px solid var(--line);overflow:hidden;flex-shrink:0;
+  }
+  .match-side-badge img{width:100%;height:100%;object-fit:contain;padding:6px;}
+  .match-side-badge.mono{font-family:'Teko',sans-serif;font-size:19px;letter-spacing:1px;color:var(--gold);background:var(--navy);}
+  .match-side-name{
+    font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:0.3px;text-align:center;color:#fff;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;
+  }
+  .match-center{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;flex-shrink:0;}
+  .match-score{font-family:'Teko',sans-serif;font-size:32px;color:#fff;letter-spacing:1px;}
+  .match-vs{font-family:'Oswald',sans-serif;font-size:12px;color:var(--mist-dim);letter-spacing:2px;}
+  .match-result{
+    width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:700;margin-top:2px;
+  }
+  .match-result.W{background:rgba(46,204,113,0.15);color:#2ecc71;}
+  .match-result.D{background:rgba(147,160,201,0.15);color:var(--mist);}
+  .match-result.L{background:rgba(216,30,61,0.15);color:var(--crimson-2);}
+  .match-card-meta{
+    margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;font-size:11px;color:var(--mist);flex-wrap:wrap;gap:6px;
+  }
+  @media(max-width:760px){.match-grid{grid-template-columns:1fr;}}
 
   /* ===== NEWS PAGE ===== */
   .news-page-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
@@ -893,24 +929,7 @@
   @media(max-width:1080px){.tourney-teaser-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:760px){.tourney-teaser-grid{grid-template-columns:1fr;}}
 
-  /* ClubVerse live data widgets (games, tournament history) */
-  .cv-games-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
-  .cv-game-list{display:flex;flex-direction:column;gap:10px;}
-  .cv-game-row{
-    background:var(--panel);border:1px solid var(--line);padding:14px 18px;
-    display:flex;align-items:center;justify-content:space-between;gap:14px;
-  }
-  .cv-game-comp{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;color:var(--mist);text-transform:uppercase;margin-bottom:5px;}
-  .cv-game-teams{font-size:14px;display:flex;align-items:center;gap:8px;}
-  .cv-game-score{font-family:'Teko',sans-serif;font-size:22px;color:#fff;white-space:nowrap;}
-  .cv-game-result{
-    width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:10px;font-weight:700;flex-shrink:0;
-  }
-  .cv-game-result.W{background:rgba(46,204,113,0.15);color:#2ecc71;}
-  .cv-game-result.D{background:rgba(147,160,201,0.15);color:var(--mist);}
-  .cv-game-result.L{background:rgba(216,30,61,0.15);color:var(--crimson-2);}
-  .cv-game-date{font-size:11px;color:var(--mist);white-space:nowrap;text-align:right;}
+  /* ClubVerse live data widgets (tournament history — match cards now use .match-* above) */
   .cv-history-row{
     background:var(--panel);border:1px solid var(--line);padding:16px 20px;
     display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;flex-wrap:wrap;
@@ -918,7 +937,6 @@
   .cv-history-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;}
   .cv-history-meta{font-size:12px;color:var(--mist);margin-top:3px;}
   .cv-history-record{font-family:'Teko',sans-serif;font-size:19px;color:#fff;white-space:nowrap;}
-  @media(max-width:760px){.cv-games-grid{grid-template-columns:1fr;}}
 
   /* Photo lightbox — full-screen enlarge for Gallery images */
   .lightbox-overlay{
@@ -1296,7 +1314,7 @@
         </div>
         <a href="#" class="btn btn-outline" data-nav="fixtures">All Fixtures &amp; Results</a>
       </div>
-      <div class="cv-game-list" id="homeResultsList"></div>
+      <div class="match-grid" id="homeResultsList"></div>
     </div>
   </section>
 
@@ -1598,15 +1616,12 @@
   </section>
 
   <section class="pad" style="padding-bottom:0;">
-    <div class="wrap cv-games-grid">
-      <div>
-        <h3 style="font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:16px;">Recent Results</h3>
-        <div class="cv-game-list" id="fixturesRecentList"></div>
+    <div class="wrap">
+      <div class="match-tabs" id="fixturesTabs">
+        <button class="match-tab-btn active" data-tab="upcoming" type="button">Upcoming Fixtures</button>
+        <button class="match-tab-btn" data-tab="recent" type="button">Recent Results</button>
       </div>
-      <div>
-        <h3 style="font-family:'Oswald',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:16px;">Upcoming Fixtures</h3>
-        <div class="cv-game-list" id="fixturesUpcomingList"></div>
-      </div>
+      <div class="match-grid" id="fixturesMatchGrid"></div>
     </div>
   </section>
 
@@ -2702,30 +2717,90 @@ renderTourneyTeaserGrid();
 /* ---------------- CLUBVERSE: LIVE GAMES, TOURNAMENT RECORD, MEMBERSHIP PLAN ---------------- */
 const CLUBVERSE_API = "https://portal.irvingnepalfc.com/api/clubverse";
 
-function formatGameDate(ms){
-  return new Date(ms).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+// Local kickoff time zone abbreviation (e.g. "CDT") — computed once, reused
+// on every card since ClubVerse only gives us a raw epoch ms timestamp.
+const LOCAL_TZ_LABEL = (() => {
+  try{
+    return new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+      .formatToParts(new Date()).find(p => p.type === 'timeZoneName').value;
+  }catch(e){ return ''; }
+})();
+function formatGameDateTime(ms){
+  const d = new Date(ms);
+  const date = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  const time = d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  return `${date} · ${time} ${LOCAL_TZ_LABEL}`.trim();
 }
-function gameScoreLine(g){
-  if(g.home.score == null && g.away.score == null) return g.status === 'scheduled' ? 'vs' : '—';
-  return `${g.home.score ?? '-'} – ${g.away.score ?? '-'}`;
+function initialsFor(name){
+  return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 }
-function gameRowHTML(g){
-  const resultBadge = g.result ? `<span class="cv-game-result ${g.result}">${g.result}</span>` : '';
+const OUR_CREST_URL = 'https://portal.irvingnepalfc.com/crest.png';
+// ClubVerse only gives us a name for the opposing side, never a crest — so
+// our own club gets the real crest image and every opponent gets a plain
+// monogram badge instead of a fabricated logo.
+function sideBadgeHTML(name){
+  if(name === 'Irving Nepal FC'){
+    return `<div class="match-side-badge"><img src="${OUR_CREST_URL}" alt="Irving Nepal FC crest"></div>`;
+  }
+  return `<div class="match-side-badge mono">${initialsFor(name)}</div>`;
+}
+function matchCardHTML(g){
+  const isLive = g.status === 'live';
+  const hasScore = g.home.score != null || g.away.score != null;
+  const centerHTML = (isLive || hasScore)
+    ? `<div class="match-score">${g.home.score ?? 0} – ${g.away.score ?? 0}</div>`
+    : `<div class="match-vs">VS</div>`;
+  const resultBadge = g.result ? `<span class="match-result ${g.result}">${g.result}</span>` : '';
+  const livePill = isLive ? `<span class="match-live-pill"><span class="dot"></span>LIVE</span>` : '';
   return `
-    <div class="cv-game-row">
-      <div>
-        <div class="cv-game-comp">${g.competition}${g.phase ? ' · ' + g.phase.replace(/_/g,' ') : ''}</div>
-        <div class="cv-game-teams">${resultBadge}<span>${g.home.name} vs ${g.away.name}</span></div>
+    <div class="match-card">
+      <div class="match-card-comp">
+        <span>${g.competition}${g.phase ? ' · ' + g.phase.replace(/_/g,' ') : ''}</span>
+        ${livePill}
       </div>
-      <div>
-        <div class="cv-game-score">${gameScoreLine(g)}</div>
-        <div class="cv-game-date">${formatGameDate(g.date)}${g.venue ? ' · ' + g.venue : ''}</div>
+      <div class="match-card-body">
+        <div class="match-side">
+          ${sideBadgeHTML(g.home.name)}
+          <span class="match-side-name">${g.home.name}</span>
+        </div>
+        <div class="match-center">
+          ${centerHTML}
+          ${resultBadge}
+        </div>
+        <div class="match-side">
+          ${sideBadgeHTML(g.away.name)}
+          <span class="match-side-name">${g.away.name}</span>
+        </div>
+      </div>
+      <div class="match-card-meta">
+        <span>${formatGameDateTime(g.date)}</span>
+        ${g.venue ? `<span>${g.venue}</span>` : ''}
       </div>
     </div>
   `;
 }
 
 let clubverseAllGames = [];
+let clubverseRecentGames = [];
+let clubverseUpcomingGames = [];
+let fixturesActiveTab = 'upcoming';
+
+function renderFixturesTab(){
+  const grid = document.getElementById('fixturesMatchGrid');
+  if(!grid) return;
+  const games = fixturesActiveTab === 'recent' ? clubverseRecentGames : clubverseUpcomingGames;
+  grid.innerHTML = games.length
+    ? games.map(matchCardHTML).join('')
+    : `<p class="news-empty">No ${fixturesActiveTab === 'recent' ? 'recent games' : 'upcoming fixtures'} yet.</p>`;
+}
+document.querySelectorAll('#fixturesTabs .match-tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#fixturesTabs .match-tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    fixturesActiveTab = btn.getAttribute('data-tab');
+    renderFixturesTab();
+  });
+});
 
 function updateHomepageMatchStats(recentGames){
   // Only games with a recorded result count — in-house scrimmages
@@ -2756,17 +2831,16 @@ async function loadClubverseGames(){
     const recent = data.recent || [];
     const upcoming = data.upcoming || [];
     clubverseAllGames = recent.concat(upcoming);
+    clubverseRecentGames = recent;
+    clubverseUpcomingGames = upcoming;
     updateHomepageMatchStats(recent);
 
     const homeList = document.getElementById('homeResultsList');
     if(homeList){
-      if(recent.length){ homeList.innerHTML = recent.slice(0,4).map(gameRowHTML).join(''); }
+      if(recent.length){ homeList.innerHTML = recent.slice(0,4).map(matchCardHTML).join(''); }
       else if(homeSection){ homeSection.style.display = 'none'; }
     }
-    const recentList = document.getElementById('fixturesRecentList');
-    if(recentList) recentList.innerHTML = recent.length ? recent.map(gameRowHTML).join('') : '<p class="news-empty">No recent games yet.</p>';
-    const upcomingList = document.getElementById('fixturesUpcomingList');
-    if(upcomingList) upcomingList.innerHTML = upcoming.length ? upcoming.map(gameRowHTML).join('') : '<p class="news-empty">No upcoming games scheduled.</p>';
+    renderFixturesTab();
     populateLonestarModal();
   }catch(e){
     if(homeSection) homeSection.style.display = 'none';
