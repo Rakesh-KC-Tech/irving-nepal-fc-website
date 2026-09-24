@@ -3118,11 +3118,19 @@ if(window.Swiper){
   const soundBtn = document.getElementById('crestSoundBtn');
   if(soundBtn){
     let audioCtx = null;
+    let masterGain = null;
     let soundOn = false;
     let soundInterval = null;
 
+    function ensureAudio(){
+      if(!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 1;
+        masterGain.connect(audioCtx.destination);
+      }
+    }
     function playChime(){
-      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const now = audioCtx.currentTime;
       [261.63, 329.63, 392.00].forEach(freq=>{
         const osc = audioCtx.createOscillator();
@@ -3132,7 +3140,7 @@ if(window.Swiper){
         g.gain.setValueAtTime(0, now);
         g.gain.linearRampToValueAtTime(0.06, now + 2);
         g.gain.linearRampToValueAtTime(0, now + 6.5);
-        osc.connect(g).connect(audioCtx.destination);
+        osc.connect(g).connect(masterGain);
         osc.start(now);
         osc.stop(now + 7);
       });
@@ -3147,18 +3155,28 @@ if(window.Swiper){
       clearInterval(soundInterval);
       soundInterval = null;
       setButtonState(false);
+      // Cut whatever's currently ringing immediately, rather than letting
+      // its own envelope play out over the next several seconds.
+      if(masterGain){
+        const now = audioCtx.currentTime;
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+        masterGain.gain.linearRampToValueAtTime(0, now + 0.05);
+      }
+    }
+    function startSound(){
+      soundOn = true;
+      setButtonState(true);
+      ensureAudio();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      masterGain.gain.setValueAtTime(1, audioCtx.currentTime);
+      playChime();
+      soundInterval = setInterval(playChime, 7000);
     }
 
     soundBtn.addEventListener('click', ()=>{
-      soundOn = !soundOn;
-      setButtonState(soundOn);
-      if(soundOn){
-        playChime();
-        soundInterval = setInterval(playChime, 7000);
-      } else {
-        clearInterval(soundInterval);
-        soundInterval = null;
-      }
+      if(soundOn) stopSound(); else startSound();
     });
     // Don't let the theme keep playing once the visitor leaves the About page.
     window.addEventListener('crestFadeViewChanged', (e)=>{
