@@ -475,37 +475,27 @@
   .value-card p{color:var(--mist);font-size:14px;line-height:1.6;}
   .timeline{margin-top:90px;}
 
-  /* ===== CREST EVOLUTION SLIDER ===== */
+  /* ===== CREST EVOLUTION CROSSFADE ===== */
   .crest-evolution p{color:var(--mist);font-size:14px;line-height:1.7;max-width:480px;}
-  .crest-slider{
+  .crest-fade{
     position:relative;max-width:360px;aspect-ratio:1/1;margin-top:20px;
-    background:var(--panel);border:1px solid var(--line);overflow:hidden;
-    user-select:none;touch-action:none;cursor:ew-resize;
+    background:var(--panel);border:1px solid var(--line);
   }
-  .crest-slider:focus-visible{outline:2px solid var(--crimson-2);outline-offset:2px;}
-  .crest-slider-old,.crest-slider-new{
+  .crest-fade-img{
     position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;
-    padding:28px;pointer-events:none;
+    padding:28px;transition:opacity 1.4s ease;
   }
-  .crest-slider-new-wrap{position:absolute;top:0;left:0;width:50%;height:100%;overflow:hidden;}
-  .crest-slider-handle{
-    position:absolute;top:50%;left:50%;width:36px;height:36px;
-    transform:translate(-50%,-50%);border-radius:50%;
-    background:var(--crimson);color:#fff;display:flex;align-items:center;justify-content:center;
-    font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,0.4);pointer-events:none;z-index:2;
+  .crest-fade-old{opacity:1;}
+  .crest-fade-new{opacity:0;}
+  .crest-fade.show-new .crest-fade-old{opacity:0;}
+  .crest-fade.show-new .crest-fade-new{opacity:1;}
+  .crest-fade-label{
+    position:absolute;bottom:10px;left:10px;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--mist);background:rgba(0,0,0,0.5);padding:4px 8px;transition:opacity 0.3s ease;
   }
-  .crest-slider-handle::before{
-    content:'';position:absolute;left:50%;width:2px;background:#fff;
-    transform:translateX(-50%);pointer-events:none;
-    top:-1000px;bottom:-1000px;
+  @media (prefers-reduced-motion: reduce){
+    .crest-fade-img,.crest-fade-label{transition:none;}
   }
-  .crest-slider-label{
-    position:absolute;bottom:10px;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;
-    text-transform:uppercase;color:var(--mist);background:rgba(0,0,0,0.5);padding:4px 8px;pointer-events:none;
-  }
-  .crest-slider-label-old{left:10px;}
-  .crest-slider-label-new{right:10px;}
-  .crest-slider-hint{font-size:12px;color:var(--mist-dim);margin-top:10px;}
 
   /* ===== SPONSORSHIP ===== */
   .sponsor-channels{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px;}
@@ -1471,17 +1461,12 @@
         <div class="crest-evolution">
           <div class="eyebrow" style="margin-top:36px;">Our Crest, Evolved</div>
           <h3 style="font-size:22px;margin:8px 0 12px;">2022 To Now</h3>
-          <p>Same club, same community — a new look for the years ahead. Drag to compare the badge that carried us through our first seasons with the one we wear today.</p>
-          <div class="crest-slider" id="crestSlider" role="slider" tabindex="0" aria-label="Compare the 2022–2026 crest with the current crest" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-            <img class="crest-slider-old" src="https://portal.irvingnepalfc.com/old-crest-2022-2026.png" alt="Irving Nepal FC's original crest, worn from 2022 to 2026">
-            <div class="crest-slider-new-wrap" id="crestSliderNewWrap">
-              <img class="crest-slider-new" src="https://portal.irvingnepalfc.com/crest.png" alt="Irving Nepal FC's current crest, worn since 2026">
-            </div>
-            <div class="crest-slider-handle" id="crestSliderHandle"><span>↔</span></div>
-            <span class="crest-slider-label crest-slider-label-old">2022–2026</span>
-            <span class="crest-slider-label crest-slider-label-new">2026–Present</span>
+          <p>Same club, same community — a new look for the years ahead. Watch the badge that carried us through our first seasons fade into the one we wear today.</p>
+          <div class="crest-fade" id="crestFade">
+            <img class="crest-fade-img crest-fade-old" src="https://portal.irvingnepalfc.com/old-crest-2022-2026.png" alt="Irving Nepal FC's original crest, worn from 2022 to 2026">
+            <img class="crest-fade-img crest-fade-new" src="https://portal.irvingnepalfc.com/crest.png" alt="Irving Nepal FC's current crest, worn since 2026">
+            <span class="crest-fade-label" id="crestFadeLabel">2022–2026</span>
           </div>
-          <p class="crest-slider-hint">Drag the handle to compare — or use ← → keys</p>
         </div>
       </div>
       <div class="value-cards">
@@ -3096,43 +3081,25 @@ if(window.Swiper){
   });
 }
 
-/* ---------------- CREST EVOLUTION SLIDER ---------------- */
+/* ---------------- CREST EVOLUTION CROSSFADE ---------------- */
 (function(){
-  const slider = document.getElementById('crestSlider');
-  if(!slider) return;
-  const handle = document.getElementById('crestSliderHandle');
-  const newWrap = document.getElementById('crestSliderNewWrap');
-  const newImg = newWrap.querySelector('img');
+  const fade = document.getElementById('crestFade');
+  if(!fade) return;
+  const label = document.getElementById('crestFadeLabel');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function setPosition(pct){
-    pct = Math.max(0, Math.min(100, pct));
-    newWrap.style.width = pct + '%';
-    handle.style.left = pct + '%';
-    slider.setAttribute('aria-valuenow', Math.round(pct));
+  let showingNew = false;
+  function toggle(){
+    showingNew = !showingNew;
+    fade.classList.toggle('show-new', showingNew);
+    setTimeout(()=>{
+      label.textContent = showingNew ? '2026–Present' : '2022–2026';
+    }, reduceMotion ? 0 : 700);
   }
-  function syncImgWidth(){
-    const w = slider.getBoundingClientRect().width;
-    if(w > 0) newImg.style.width = w + 'px';
-  }
-  syncImgWidth();
-  window.addEventListener('resize', syncImgWidth);
-  window.syncCrestSliderWidth = syncImgWidth;
 
-  let dragging = false;
-  function moveTo(clientX){
-    const rect = slider.getBoundingClientRect();
-    setPosition(((clientX - rect.left) / rect.width) * 100);
+  if(!reduceMotion){
+    setInterval(toggle, 3200);
   }
-  slider.addEventListener('pointerdown', e=>{ dragging = true; moveTo(e.clientX); });
-  window.addEventListener('pointerup', ()=>{ dragging = false; });
-  window.addEventListener('pointermove', e=>{ if(dragging) moveTo(e.clientX); });
-  slider.addEventListener('keydown', e=>{
-    const current = parseFloat(newWrap.style.width) || 50;
-    if(e.key === 'ArrowLeft'){ setPosition(current - 5); e.preventDefault(); }
-    else if(e.key === 'ArrowRight'){ setPosition(current + 5); e.preventDefault(); }
-  });
-
-  setPosition(50);
 })();
 
 /* ---------------- FAQ ACCORDION ---------------- */
@@ -3155,9 +3122,6 @@ showView = function(name){
   setTimeout(()=>{
     activeView.querySelectorAll('[data-aos]').forEach(el=>el.classList.add('aos-animate'));
   }, 400);
-  // Crest slider's "new" image needs a real pixel width to size against —
-  // recompute once the view (and its layout) is actually visible.
-  if(window.syncCrestSliderWidth) setTimeout(window.syncCrestSliderWidth, 60);
 };
 
 /* ---------------- STORE: RETURN FROM STRIPE CHECKOUT ---------------- */
