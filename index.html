@@ -1477,7 +1477,6 @@
             <img class="crest-fade-img crest-fade-new" src="https://portal.irvingnepalfc.com/crest.png" alt="Irving Nepal FC's current crest, worn since 2026">
             <span class="crest-fade-label" id="crestFadeLabel">2022–2026</span>
             <button class="crest-fade-sound" id="crestSoundBtn" type="button" aria-pressed="false" aria-label="Play theme music">🔇</button>
-            <audio id="crestAudio" src="https://portal.irvingnepalfc.com/crest-theme.mp3" loop preload="none"></audio>
           </div>
         </div>
       </div>
@@ -3113,29 +3112,57 @@ if(window.Swiper){
     setInterval(toggle, 7000);
   }
 
+  // Soft synthesized chime (Web Audio API) instead of a licensed track —
+  // three-note swell timed to the crossfade, generated in-browser so there's
+  // no audio file to source or license.
   const soundBtn = document.getElementById('crestSoundBtn');
-  const audio = document.getElementById('crestAudio');
-  if(soundBtn && audio){
+  if(soundBtn){
+    let audioCtx = null;
+    let soundOn = false;
+    let soundInterval = null;
+
+    function playChime(){
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioCtx.currentTime;
+      [261.63, 329.63, 392.00].forEach(freq=>{
+        const osc = audioCtx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(0, now);
+        g.gain.linearRampToValueAtTime(0.06, now + 2);
+        g.gain.linearRampToValueAtTime(0, now + 6.5);
+        osc.connect(g).connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 7);
+      });
+    }
+    function setButtonState(on){
+      soundBtn.textContent = on ? '🔊' : '🔇';
+      soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      soundBtn.setAttribute('aria-label', on ? 'Mute theme music' : 'Play theme music');
+    }
+    function stopSound(){
+      soundOn = false;
+      clearInterval(soundInterval);
+      soundInterval = null;
+      setButtonState(false);
+    }
+
     soundBtn.addEventListener('click', ()=>{
-      if(audio.paused){
-        audio.play().catch(()=>{});
+      soundOn = !soundOn;
+      setButtonState(soundOn);
+      if(soundOn){
+        playChime();
+        soundInterval = setInterval(playChime, 7000);
       } else {
-        audio.pause();
+        clearInterval(soundInterval);
+        soundInterval = null;
       }
-    });
-    audio.addEventListener('play', ()=>{
-      soundBtn.textContent = '🔊';
-      soundBtn.setAttribute('aria-pressed', 'true');
-      soundBtn.setAttribute('aria-label', 'Pause theme music');
-    });
-    audio.addEventListener('pause', ()=>{
-      soundBtn.textContent = '🔇';
-      soundBtn.setAttribute('aria-pressed', 'false');
-      soundBtn.setAttribute('aria-label', 'Play theme music');
     });
     // Don't let the theme keep playing once the visitor leaves the About page.
     window.addEventListener('crestFadeViewChanged', (e)=>{
-      if(e.detail !== 'about' && !audio.paused) audio.pause();
+      if(e.detail !== 'about' && soundOn) stopSound();
     });
   }
 })();
