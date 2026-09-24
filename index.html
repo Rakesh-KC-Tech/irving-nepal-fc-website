@@ -475,6 +475,38 @@
   .value-card p{color:var(--mist);font-size:14px;line-height:1.6;}
   .timeline{margin-top:90px;}
 
+  /* ===== CREST EVOLUTION SLIDER ===== */
+  .crest-evolution p{color:var(--mist);font-size:14px;line-height:1.7;max-width:480px;}
+  .crest-slider{
+    position:relative;max-width:360px;aspect-ratio:1/1;margin-top:20px;
+    background:var(--panel);border:1px solid var(--line);overflow:hidden;
+    user-select:none;touch-action:none;cursor:ew-resize;
+  }
+  .crest-slider:focus-visible{outline:2px solid var(--crimson-2);outline-offset:2px;}
+  .crest-slider-old,.crest-slider-new{
+    position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;
+    padding:28px;pointer-events:none;
+  }
+  .crest-slider-new-wrap{position:absolute;top:0;left:0;width:50%;height:100%;overflow:hidden;}
+  .crest-slider-handle{
+    position:absolute;top:50%;left:50%;width:36px;height:36px;
+    transform:translate(-50%,-50%);border-radius:50%;
+    background:var(--crimson);color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,0.4);pointer-events:none;z-index:2;
+  }
+  .crest-slider-handle::before{
+    content:'';position:absolute;left:50%;width:2px;background:#fff;
+    transform:translateX(-50%);pointer-events:none;
+    top:-1000px;bottom:-1000px;
+  }
+  .crest-slider-label{
+    position:absolute;bottom:10px;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--mist);background:rgba(0,0,0,0.5);padding:4px 8px;pointer-events:none;
+  }
+  .crest-slider-label-old{left:10px;}
+  .crest-slider-label-new{right:10px;}
+  .crest-slider-hint{font-size:12px;color:var(--mist-dim);margin-top:10px;}
+
   /* ===== SPONSORSHIP ===== */
   .sponsor-channels{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px;}
   .sponsor-channel{background:var(--panel);border:1px solid var(--line);padding:20px 18px;}
@@ -1434,7 +1466,23 @@
         <h2 style="font-size:40px;margin-bottom:20px;">From Weekend Pickup Games To A Registered Club</h2>
         <p>Irving Nepal FC began as informal weekend games among Nepali families in the DFW metroplex, looking for a way to stay connected to home. What started with a handful of players on a borrowed field grew into a fully registered club within a year.</p>
         <p>Today we field competitive men's sides, run a growing youth academy, and serve as a gathering point for the wider Nepali diaspora in North Texas — on matchdays and well beyond them.</p>
-        <p>Every crest detail carries meaning: the pagoda skyline of the Kathmandu Valley, the red and blue of the Nepali flag, and a player in full stride — reaching for something bigger than the scoreline.</p>
+        <p>Every crest detail carries meaning: the pagoda skyline of the Kathmandu Valley, the red of the Nepali flag, and the ball at the center of why we're all here.</p>
+
+        <div class="crest-evolution">
+          <div class="eyebrow" style="margin-top:36px;">Our Crest, Evolved</div>
+          <h3 style="font-size:22px;margin:8px 0 12px;">2022 To Now</h3>
+          <p>Same club, same community — a new look for the years ahead. Drag to compare the badge that carried us through our first seasons with the one we wear today.</p>
+          <div class="crest-slider" id="crestSlider" role="slider" tabindex="0" aria-label="Compare the 2022–2026 crest with the current crest" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <img class="crest-slider-old" src="https://portal.irvingnepalfc.com/old-crest-2022-2026.png" alt="Irving Nepal FC's original crest, worn from 2022 to 2026">
+            <div class="crest-slider-new-wrap" id="crestSliderNewWrap">
+              <img class="crest-slider-new" src="https://portal.irvingnepalfc.com/crest.png" alt="Irving Nepal FC's current crest, worn since 2026">
+            </div>
+            <div class="crest-slider-handle" id="crestSliderHandle"><span>↔</span></div>
+            <span class="crest-slider-label crest-slider-label-old">2022–2026</span>
+            <span class="crest-slider-label crest-slider-label-new">2026–Present</span>
+          </div>
+          <p class="crest-slider-hint">Drag the handle to compare — or use ← → keys</p>
+        </div>
       </div>
       <div class="value-cards">
         <div class="value-card"><div class="num">Mission</div><h3>Unity Through Football</h3><p>Build a home away from home for the Nepali community of Irving through the game we all grew up loving.</p></div>
@@ -3048,6 +3096,45 @@ if(window.Swiper){
   });
 }
 
+/* ---------------- CREST EVOLUTION SLIDER ---------------- */
+(function(){
+  const slider = document.getElementById('crestSlider');
+  if(!slider) return;
+  const handle = document.getElementById('crestSliderHandle');
+  const newWrap = document.getElementById('crestSliderNewWrap');
+  const newImg = newWrap.querySelector('img');
+
+  function setPosition(pct){
+    pct = Math.max(0, Math.min(100, pct));
+    newWrap.style.width = pct + '%';
+    handle.style.left = pct + '%';
+    slider.setAttribute('aria-valuenow', Math.round(pct));
+  }
+  function syncImgWidth(){
+    const w = slider.getBoundingClientRect().width;
+    if(w > 0) newImg.style.width = w + 'px';
+  }
+  syncImgWidth();
+  window.addEventListener('resize', syncImgWidth);
+  window.syncCrestSliderWidth = syncImgWidth;
+
+  let dragging = false;
+  function moveTo(clientX){
+    const rect = slider.getBoundingClientRect();
+    setPosition(((clientX - rect.left) / rect.width) * 100);
+  }
+  slider.addEventListener('pointerdown', e=>{ dragging = true; moveTo(e.clientX); });
+  window.addEventListener('pointerup', ()=>{ dragging = false; });
+  window.addEventListener('pointermove', e=>{ if(dragging) moveTo(e.clientX); });
+  slider.addEventListener('keydown', e=>{
+    const current = parseFloat(newWrap.style.width) || 50;
+    if(e.key === 'ArrowLeft'){ setPosition(current - 5); e.preventDefault(); }
+    else if(e.key === 'ArrowRight'){ setPosition(current + 5); e.preventDefault(); }
+  });
+
+  setPosition(50);
+})();
+
 /* ---------------- FAQ ACCORDION ---------------- */
 document.querySelectorAll('#faqList .faq-item').forEach(item=>{
   item.querySelector('.faq-q').addEventListener('click', ()=>{
@@ -3068,6 +3155,9 @@ showView = function(name){
   setTimeout(()=>{
     activeView.querySelectorAll('[data-aos]').forEach(el=>el.classList.add('aos-animate'));
   }, 400);
+  // Crest slider's "new" image needs a real pixel width to size against —
+  // recompute once the view (and its layout) is actually visible.
+  if(window.syncCrestSliderWidth) setTimeout(window.syncCrestSliderWidth, 60);
 };
 
 /* ---------------- STORE: RETURN FROM STRIPE CHECKOUT ---------------- */
