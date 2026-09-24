@@ -552,15 +552,26 @@
 
   .filter-btn.active,.filter-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
   .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
-  .player-card{background:var(--panel);border:1px solid var(--line);overflow:hidden;position:relative;transition:transform .25s;}
-  .player-card:hover{transform:translateY(-8px);}
+  .player-card{
+    background:var(--panel);border:1px solid var(--line);overflow:hidden;position:relative;
+    transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .player-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.35);}
   .player-photo{
     height:260px;background:linear-gradient(160deg,var(--navy-3),var(--royal));
     display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden;
   }
+  .player-photo img{transition:transform .5s ease;}
+  .player-card:hover .player-photo img{transform:scale(1.06);}
   .player-photo .jersey-num{
     font-family:'Teko',sans-serif;font-size:130px;color:rgba(255,255,255,0.08);
-    position:absolute;top:-10px;right:-6px;
+    position:absolute;top:-10px;right:-6px;pointer-events:none;
+  }
+  .player-pos-pill{
+    position:absolute;top:14px;left:14px;z-index:2;
+    font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+    padding:4px 10px;border-radius:3px;background:rgba(0,0,0,0.55);color:var(--gold);
+    border:1px solid rgba(216,180,106,0.4);
   }
   .player-silhouette{font-size:90px;opacity:0.85;margin-bottom:-6px;}
   .player-info{padding:18px 20px;}
@@ -569,13 +580,18 @@
   .player-info span{color:var(--mist);font-size:12px;letter-spacing:1px;text-transform:uppercase;}
 
   .staff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:20px;}
-  .staff-card{display:flex;gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:22px;}
-  .staff-photo{width:70px;height:70px;border-radius:50%;background:linear-gradient(160deg,var(--navy-3),var(--crimson));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:30px;}
+  .staff-card{
+    display:flex;gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:22px;
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .staff-card:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(0,0,0,0.3);}
+  .staff-photo{width:70px;height:70px;border-radius:50%;background:linear-gradient(160deg,var(--navy-3),var(--crimson));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden;}
   .staff-card h4{font-family:'Oswald',sans-serif;font-size:16px;text-transform:none;font-weight:600;}
   .staff-card span{color:var(--mist);font-size:12px;letter-spacing:1px;text-transform:uppercase;}
 
   .cv-member-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;}
-  .cv-member-card{background:var(--panel);border:1px solid var(--line);padding:16px 10px;text-align:center;}
+  .cv-member-card{background:var(--panel);border:1px solid var(--line);padding:16px 10px;text-align:center;transition:transform .25s ease;}
+  .cv-member-card:hover{transform:translateY(-4px);}
   .cv-member-photo{
     width:64px;height:64px;border-radius:50%;margin:0 auto 12px;overflow:hidden;
     background:linear-gradient(160deg,var(--navy-3),var(--royal));
@@ -2243,6 +2259,7 @@ function findClubversePosition(name){
     || clubversePositionsByFirstWord[firstWord(name)];
 }
 
+const POS_PILL_LABELS = {GK:'GK', DF:'DEF', MF:'MID', FW:'FWD'};
 function renderTeam(filter="all"){
   teamFilter = filter;
   const grid = document.getElementById('teamGrid');
@@ -2255,6 +2272,7 @@ function renderTeam(filter="all"){
     return `
     <div class="player-card" data-aos="fade-up" data-aos-delay="${(idx%4)*80}">
       <div class="player-photo">
+        <span class="player-pos-pill">${POS_PILL_LABELS[p.pos] || p.pos}</span>
         ${photoContent}
         <div class="jersey-num">${p.n}</div>
       </div>
