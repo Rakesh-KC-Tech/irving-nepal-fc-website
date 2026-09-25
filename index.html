@@ -164,15 +164,26 @@
   .btn{
     font-family:'Oswald',sans-serif;
     font-size:13px;letter-spacing:1.5px;text-transform:uppercase;
-    padding:12px 22px;
+    padding:14px 32px;
     display:inline-flex;align-items:center;gap:8px;
-    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
-    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+    border-radius:9999px;position:relative;overflow:hidden;cursor:pointer;
+    transition:transform .25s cubic-bezier(.4,0,.2,1), box-shadow .25s cubic-bezier(.4,0,.2,1), background .25s ease, border-color .25s ease;
   }
+  .btn::before{
+    content:'';position:absolute;top:0;left:-75%;width:50%;height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,0.35),transparent);
+    transform:skewX(-20deg);transition:left .6s ease;pointer-events:none;
+  }
+  .btn:hover::before{left:125%;}
+  .btn:hover{transform:translateY(-2px) scale(1.02);}
+  .btn:active{transform:scale(0.95);}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+  .btn-arrow{display:inline-block;transition:transform .25s ease;}
+  a:hover .btn-arrow,button:hover .btn-arrow{transform:translateX(4px);}
   .btn-primary{background:linear-gradient(135deg,var(--crimson),var(--crimson-2));color:#fff;}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(216,30,61,0.4);}
+  .btn-primary:hover{box-shadow:0 10px 25px -5px rgba(216,30,61,0.5);}
   .btn-outline{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.25);}
-  .btn-outline:hover{border-color:var(--white);background:rgba(255,255,255,0.06);}
+  .btn-outline:hover{border-color:var(--white);background:rgba(255,255,255,0.08);box-shadow:0 10px 25px -5px rgba(255,255,255,0.15);}
   .btn-ghost-cart{
     position:relative;background:rgba(255,255,255,0.06);
     width:42px;height:42px;display:flex;align-items:center;justify-content:center;
@@ -552,7 +563,8 @@
       radial-gradient(circle at 30% 20%, rgba(255,255,255,0.08), transparent 55%);
   }
 
-  .filter-btn.active,.filter-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+  .filter-btn.active,.filter-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);transform:translateY(-2px);}
+  .filter-btn:active{transform:scale(0.95);}
   .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
   .player-card{
     background:var(--panel);border:1px solid var(--line);overflow:hidden;position:relative;
@@ -1047,7 +1059,8 @@
     display:flex;align-items:center;gap:8px;transition:all .2s;
   }
   .tourney-tab-btn .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
-  .tourney-tab-btn.active,.tourney-tab-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+  .tourney-tab-btn.active,.tourney-tab-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);transform:translateY(-2px);}
+  .tourney-tab-btn:active{transform:scale(0.95);}
   @media(max-width:1080px){.tourney-teaser-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:760px){.tourney-teaser-grid{grid-template-columns:1fr;}}
 
@@ -1325,6 +1338,41 @@
     .fixture-loc{display:none;}
     .stats-grid{grid-template-columns:1fr 1fr;}
     .stat-card{border-right:none;border-bottom:1px solid var(--line);}
+  }
+
+  /* ===== GLOBAL ROUNDED-CORNER PASS =====
+     Every panel/card container gets soft rounded corners instead of sharp
+     90° corners; small tags/status chips get full stadium/pill curvature.
+     Kept as one consolidated rule (rather than editing each card's own
+     block) so nothing here fights the border-radius:50% already used by
+     circular elements (crests, avatars, dots) — those are deliberately
+     left out of this list. */
+  .match-card, .news-card, .news-controls input[type="search"], .value-card,
+  .crest-fade, .sponsor-channel, .tier-card, .filter-btn, .player-card,
+  .staff-card, .cv-member-card, .practice-card, .calendar-empty-state,
+  .product-card, .kit-card, .plan-card, .field input, .field select,
+  .field textarea, .contact-icon, .map-box, .testi-card, .live-panel,
+  .tourney-card, .tourney-tab-btn, .tourney-record-card, .lm-stat,
+  .our-match-card, .bracket-note, .lonestar-sponsors span, .video-wrap,
+  .view-toggle-btn, .match-tab-btn{
+    border-radius:20px;
+  }
+  .news-card .img{border-radius:20px 20px 0 0;}
+  .news-card.feature .img{border-radius:20px 20px 0 0;}
+  .kit-card{border-radius:20px;overflow:hidden;}
+  .lonestar-modal-head .close-x{border-radius:50%;}
+  .news-card .img .tag, .match-status-pill, .match-live-pill, .match-result,
+  .tourney-status, .rm-month-pill, .rm-cal-scroll-btn, .calendar-nav-btn{
+    border-radius:9999px;
+  }
+
+  /* Visible keyboard-focus ring on every interactive control that didn't
+     already have one (form inputs keep their existing border-color focus
+     treatment, so they're left out here). */
+  button:focus-visible, a:focus-visible, .filter-btn:focus-visible,
+  .view-toggle-btn:focus-visible, .match-tab-btn:focus-visible,
+  .rm-month-pill:focus-visible, .tourney-tab-btn:focus-visible{
+    outline:2px solid var(--gold);outline-offset:3px;
   }
 </style>
 </head>
@@ -2228,7 +2276,7 @@
           <div class="sp-logo sp-logo--veltrix" style="height:60px;"><img src="sponsor-veltrix.png" alt="Veltrix" style="max-height:48px;max-width:170px;"></div>
         </div>
         <p class="lm-sub" style="margin:20px 0 12px;">The squad that carried the crest into this tournament — led by captain Sujan Lama.</p>
-        <a href="#" class="btn btn-outline" id="lonestarSquadLink">Meet The Squad →</a>
+        <a href="#" class="btn btn-outline" id="lonestarSquadLink">Meet The Squad <span class="btn-arrow">→</span></a>
       </div>
 
     </div>
@@ -2983,7 +3031,7 @@ function matchCardHTML(g, index){
         ? `<span class="match-status-pill upcoming">Upcoming</span>`
         : '';
   const video = findMatchVideo(g);
-  const watchLink = video ? `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" rel="noopener" class="match-watch-link">▶ Watch</a>` : '';
+  const watchLink = video ? `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" rel="noopener" class="match-watch-link"><span class="btn-arrow">▶</span> Watch</a>` : '';
   const staggerStyle = index != null ? ` style="--i:${index}"` : '';
   return `
     <div class="match-card"${staggerStyle} data-game-id="${g.id}">
@@ -3328,7 +3376,7 @@ function tournamentHistoryRowHTML(row, index){
       </div>
       ${row.publicSlug ? `
       <a href="https://clubverseapp.com/t/${row.publicSlug}" target="_blank" rel="noopener" class="tourney-record-link">
-        View Full Standings &amp; Bracket on ClubVerse →
+        View Full Standings &amp; Bracket on ClubVerse <span class="btn-arrow">→</span>
       </a>` : ''}
     </div>
   `;
