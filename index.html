@@ -410,6 +410,11 @@
   .news-card:hover{transform:translateY(-6px);}
   .news-card .img{height:200px;background:linear-gradient(135deg,var(--navy-3),var(--royal));background-size:cover;background-position:center;position:relative;}
   .news-card.feature .img{height:340px;}
+  .news-card-logo-fallback{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:64px;height:64px;object-fit:contain;opacity:0.9;
+  }
+  .news-card.feature .news-card-logo-fallback{width:100px;height:100px;}
   .news-card .img .tag{
     position:absolute;bottom:14px;left:14px;background:var(--crimson);
     font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;padding:5px 12px;text-transform:uppercase;
@@ -1001,7 +1006,10 @@
   }
   .tourney-banner .tourney-status{position:absolute;top:22px;right:22px;z-index:1;}
   .tourney-card-icon{font-size:76px;position:relative;z-index:1;filter:drop-shadow(0 8px 20px rgba(0,0,0,0.4));}
-  .tourney-card-icon img{max-width:120px;max-height:120px;object-fit:contain;border-radius:50%;}
+  /* Real tournament banners are full square promotional graphics, not tiny
+     circular badges — show the whole image (never cropped) at a size that
+     actually fills the panel instead of a small circle-masked sliver. */
+  .tourney-card-icon img{max-width:92%;max-height:236px;width:auto;height:auto;object-fit:contain;border-radius:12px;}
   .live-panel-body{padding:32px;}
   .live-panel-body h3{font-size:30px;font-family:'Oswald',sans-serif;font-weight:600;text-transform:none;letter-spacing:0;margin-bottom:10px;}
   .live-panel-body .sub{color:var(--mist);font-size:15px;line-height:1.7;max-width:640px;margin-bottom:24px;}
@@ -1015,7 +1023,7 @@
   }
   .tourney-card:hover{transform:translateY(-6px);border-color:rgba(216,30,61,0.4);}
   .tourney-card-banner{
-    height:130px;background:linear-gradient(160deg,var(--navy-3),var(--royal));
+    height:172px;background:linear-gradient(160deg,var(--navy-3),var(--royal));
     position:relative;overflow:hidden;
     display:flex;align-items:center;justify-content:center;padding:14px;
   }
@@ -1037,7 +1045,7 @@
     box-shadow:0 10px 26px rgba(0,0,0,0.4);
   }
   .tourney-card-banner .tourney-card-icon.is-fallback{width:58px;height:58px;font-size:26px;}
-  .tourney-card-banner .tourney-card-icon img{max-width:76px;max-height:76px;}
+  .tourney-card-banner .tourney-card-icon img{max-width:92%;max-height:144px;}
   .tourney-card-body{padding:20px 24px 24px;display:flex;flex-direction:column;gap:12px;flex:1;}
   .tourney-status{
     align-self:flex-start;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
@@ -1153,6 +1161,11 @@
   }
   .announce-close:hover{background:var(--crimson);border-color:var(--crimson);}
   .announce-img{width:100%;height:180px;object-fit:cover;display:block;}
+  .announce-img-fallback{
+    background:linear-gradient(160deg,var(--navy-3),var(--royal));
+    display:flex;align-items:center;justify-content:center;
+  }
+  .announce-img-fallback img{width:auto;height:110px;object-fit:contain;}
   .announce-body{padding:26px 28px 28px;}
   .announce-tag{
     display:inline-block;background:var(--crimson);color:#fff;font-family:'Oswald',sans-serif;
@@ -1443,9 +1456,9 @@
         </div>
         <div class="hero-stats" data-aos="fade-up" data-aos-delay="200">
           <div><b data-countup="2022" data-suffix="">2022</b><span>Founded</span></div>
-          <div><b data-countup="0" data-suffix="" id="statsMatchesPlayed1">0</b><span>Matches Played</span></div>
-          <div><b data-countup="0" data-suffix="" id="statsWins1">0</b><span>Wins</span></div>
-          <div><b data-countup="90" data-suffix="+" id="memberCountStat1">0+</b><span>Registered Players</span></div>
+          <div><b id="statsMatchesPlayed1">—</b><span>Matches Played</span></div>
+          <div><b id="statsWins1">—</b><span>Wins</span></div>
+          <div><b id="memberCountStat1">—</b><span>Registered Players</span></div>
         </div>
       </div>
       <div class="hero-crest" data-aos="zoom-in" data-aos-delay="150">
@@ -1469,9 +1482,9 @@
   <!-- STATS BAND -->
   <section class="stats-band">
     <div class="wrap stats-grid">
-      <div class="stat-card"><span class="stat-icon">⚽</span><b data-countup="0" id="statsMatchesPlayed2">0</b><p>Matches Played</p></div>
-      <div class="stat-card"><span class="stat-icon">🏆</span><b data-countup="0" id="statsWins2">0</b><p>Total Wins</p></div>
-      <div class="stat-card"><span class="stat-icon">🤝</span><b data-countup="90" data-suffix="+" id="memberCountStat3">0+</b><p>Active Players</p></div>
+      <div class="stat-card"><span class="stat-icon">⚽</span><b id="statsMatchesPlayed2">—</b><p>Matches Played</p></div>
+      <div class="stat-card"><span class="stat-icon">🏆</span><b id="statsWins2">—</b><p>Total Wins</p></div>
+      <div class="stat-card"><span class="stat-icon">🤝</span><b id="memberCountStat3">—</b><p>Active Players</p></div>
     </div>
   </section>
 
@@ -2564,11 +2577,13 @@ function formatNewsDate(iso){
 }
 
 function newsCardHTML(a, featured, index){
-  const imgStyle = a.featured_image_url ? ` style="background-image:url('${a.featured_image_url}')"` : '';
+  const hasImage = !!a.featured_image_url;
+  const imgStyle = hasImage ? ` style="background-image:url('${a.featured_image_url}')"` : '';
+  const logoFallback = hasImage ? '' : `<img class="news-card-logo-fallback" src="https://portal.irvingnepalfc.com/crest.png" alt="Irving Nepal FC">`;
   const aos = index != null ? ` data-aos="fade-up" data-aos-delay="${(index%6)*80}"` : '';
   return `
     <a class="news-card${featured?' feature':''}" href="${a.url}" target="_blank" rel="noopener"${aos}>
-      <div class="img"${imgStyle}><span class="tag">${a.category}</span></div>
+      <div class="img"${imgStyle}>${logoFallback}<span class="tag">${a.category}</span></div>
       <div class="news-body">
         <div class="date">${formatNewsDate(a.published_at)}</div>
         <h3>${a.headline}</h3>
@@ -3248,19 +3263,21 @@ function updateHomepageMatchStats(recentGames){
   const played = decided.length;
   const winRate = played > 0 ? Math.round((wins / played) * 100) : null;
 
-  // Also update data-countup, not just the visible text — the scroll-
-  // triggered count-up animation (see animateCountUp below) reads that
-  // attribute whenever this element first scrolls into view, and it only
-  // fires once. Leaving it at its hardcoded "0" default meant any visitor
-  // who scrolled here *after* this fetch resolved got the real number
-  // overwritten back down to 0 the moment it animated in.
+  // These elements deliberately have no data-countup attribute in the HTML
+  // (unlike the static "2022 Founded" stat) — their real value doesn't
+  // exist until this fetch resolves, so they're excluded from the generic
+  // scroll-into-view observer entirely. animateCountUp() reads its target
+  // from data-countup at the moment it's *called*, so setting the
+  // attribute and starting the animation together here — only once the
+  // real number is known — means there's no earlier, wrongly-targeted
+  // animation loop that could still be running and fighting this value.
   ['statsMatchesPlayed1','statsMatchesPlayed2'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el){ el.textContent = String(played); el.setAttribute('data-countup', String(played)); }
+    if(el){ el.setAttribute('data-countup', String(played)); animateCountUp(el); }
   });
   ['statsWins1','statsWins2'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el){ el.textContent = String(wins); el.setAttribute('data-countup', String(wins)); }
+    if(el){ el.setAttribute('data-countup', String(wins)); animateCountUp(el); }
   });
   const winRateEl = document.getElementById('statsWinRate');
   if(winRateEl) winRateEl.textContent = winRate != null ? `${winRate}%` : '—';
@@ -3462,14 +3479,19 @@ async function loadClubverseClub(){
     const club = data.club;
     if(club && club.memberCount != null){
       const text = `${club.memberCount}+`;
-      ['memberCountStat1','memberCountStat2','memberCountStat3'].forEach(id=>{
+      // memberCountStat1/3 animate (same pattern as the match stats above —
+      // no data-countup in the HTML, so the animation only ever starts once
+      // the real number is known). memberCountStat2 has no counter treatment
+      // at all, just plain text, so it's set directly.
+      ['memberCountStat1','memberCountStat3'].forEach(id=>{
         const el = document.getElementById(id);
         if(!el) return;
-        el.textContent = text;
-        // Same fix as match stats — keep the count-up animation's target in
-        // sync so a later scroll-into-view doesn't reset this back to 0.
-        if(el.hasAttribute('data-countup')) el.setAttribute('data-countup', String(club.memberCount));
+        el.setAttribute('data-countup', String(club.memberCount));
+        el.setAttribute('data-suffix', '+');
+        animateCountUp(el);
       });
+      const el2 = document.getElementById('memberCountStat2');
+      if(el2) el2.textContent = text;
     }
 
     const plan = club && club.membershipPlan;
@@ -3521,7 +3543,7 @@ async function loadAnnouncementPopup(){
     document.getElementById('announceReadMore').href = a.url;
     document.getElementById('announceImgWrap').innerHTML = a.featured_image_url
       ? `<img class="announce-img" src="${a.featured_image_url}" alt="">`
-      : '';
+      : `<div class="announce-img announce-img-fallback"><img src="https://portal.irvingnepalfc.com/crest.png" alt="Irving Nepal FC"></div>`;
 
     const overlay = document.getElementById('announceOverlay');
     function dismissAnnouncement(){
