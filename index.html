@@ -655,6 +655,8 @@
     margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
     display:flex;justify-content:space-between;font-size:11px;color:var(--mist);flex-wrap:wrap;gap:6px;
   }
+  .match-watch-link{color:var(--crimson-2);font-weight:600;text-decoration:none;letter-spacing:0.3px;}
+  .match-watch-link:hover{text-decoration:underline;}
   @media(max-width:760px){.match-grid{grid-template-columns:1fr;}}
 
   /* ===== NEWS PAGE ===== */
@@ -961,6 +963,11 @@
   .tourney-stat{background:var(--navy-2);border:1px solid var(--line);padding:10px 6px;text-align:center;}
   .tourney-stat b{display:block;font-family:'Teko',sans-serif;font-size:22px;color:#fff;}
   .tourney-stat span{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mist);}
+  .tourney-record-link{
+    display:inline-block;margin-top:16px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:0.5px;
+    color:var(--gold);border-bottom:1px solid rgba(216,180,106,0.4);padding-bottom:2px;transition:color .2s;
+  }
+  .tourney-record-link:hover{color:var(--crimson-2);border-color:var(--crimson-2);}
   @media(max-width:760px){.tourney-record-stats{grid-template-columns:repeat(4,1fr);}}
 
   /* Photo lightbox — full-screen enlarge for Gallery images */
@@ -2762,15 +2769,78 @@ function initialsFor(name){
   return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 }
 const OUR_CREST_URL = 'https://portal.irvingnepalfc.com/crest.png';
-// ClubVerse only gives us a name for the opposing side, never a crest — so
-// our own club gets the real crest image and every opponent gets a plain
-// monogram badge instead of a fabricated logo.
+// ClubVerse's Partner API doesn't include opponent crests in game/tournament
+// data — but the real logos do exist publicly on ClubVerse's own site
+// (clubverseapp.com/t/{tournament}), hosted on their Firebase Storage. This
+// is a manually-pulled snapshot of real opponents we've actually played, not
+// a live feed — it needs a manual refresh whenever a new opponent shows up
+// that isn't in this list yet (they'll just get the monogram badge until then).
+const CLUBVERSE_OPPONENT_LOGOS = {
+  'back again fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/club_icons%2Ficon_1786422570205.jpg?alt=media&token=581975f2-b10e-4f42-b8a0-7e642fa65248',
+  'blackthorn united': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/tournament_club_logos%2Fm6FbF0q8RkPbk5vHH5x8%2Flogo-1787963771722.jpg?alt=media&token=d424cdf8-5422-4166-8bd2-49cc735fd5ed',
+  'd-town fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FgQlxn9woZTEH9Ek4hk29%2Fprofile%2Ficon.png?alt=media&token=df885f56-3535-4b60-aa49-75aa7c8dcd02',
+  'dfw himalayas fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FVhSoE2CakUAfulGfSzWk%2Fprofile%2Ficon-1783518075852.jpg?alt=media&token=0d9f95ce-aef5-4b6d-a1ee-b5e1a181ed95',
+  'erfc spot': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FigM8zt66U4eS67y7RJq5%2Fprofile%2Ficon.jpg?alt=media&token=12880755-8a51-4bb5-b86a-c6dcfa1c514b',
+  'euless royal fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FigM8zt66U4eS67y7RJq5%2Fprofile%2Ficon.jpg?alt=media&token=12880755-8a51-4bb5-b86a-c6dcfa1c514b',
+  'euless royal football club': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FigM8zt66U4eS67y7RJq5%2Fprofile%2Ficon.jpg?alt=media&token=12880755-8a51-4bb5-b86a-c6dcfa1c514b',
+  'fortworth rising star fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FcgApPWuTR7c70iWfWyxs%2Fprofile%2Ficon-1783633999895.jpg?alt=media&token=454fe58e-af47-4c23-81e6-b178b4eb03a8',
+  'goal buster fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/tournament_club_logos%2FjEg3scFVNPVFFvUXb5b0%2FGoal_Buster_FC-d565bc68-4632-4ef7-96bc-4bf98d85df89.jpg?alt=media&token=d2a21b96-da30-40b0-89e4-4d6fd926b809',
+  'khukuri fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/tournament_club_logos%2F8aOlpvO6Pj72ModK8w5c%2Flogo-1788404791043.jpg?alt=media&token=0c99b6e5-4d32-4334-8ce4-02eea9bf670f',
+  'machhapuchhre fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FQ1LgsdWfqK6BVcWjv0Ns%2Fprofile%2Ficon.jpg?alt=media&token=ae390258-7651-4349-89b6-71c4cec9a266',
+  'parbat fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FulTplmAQ4Buzg70qIq7V%2Fprofile%2Ficon.jpg?alt=media&token=30787db8-93de-4b1e-a877-c44da0eb6cb3',
+  'parvat fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2FulTplmAQ4Buzg70qIq7V%2Fprofile%2Ficon.jpg?alt=media&token=30787db8-93de-4b1e-a877-c44da0eb6cb3',
+  'peak fc': 'https://firebasestorage.googleapis.com/v0/b/club-managment-system.firebasestorage.app/o/clubs%2F8KANSv3iy0DcBFm1EgTd%2Fprofile%2Ficon.png?alt=media&token=c48448cd-9586-4151-be26-240b1dd1a596',
+};
+function findOpponentLogo(name){
+  return CLUBVERSE_OPPONENT_LOGOS[(name||'').toLowerCase().trim().replace(/\s+/g,' ')] || null;
+}
 function sideBadgeHTML(name){
   if(name === 'Irving Nepal FC'){
     return `<div class="match-side-badge"><img src="${OUR_CREST_URL}" alt="Irving Nepal FC crest"></div>`;
   }
+  const logoUrl = findOpponentLogo(name);
+  if(logoUrl){
+    return `<div class="match-side-badge"><img src="${logoUrl}" alt="${name} crest" loading="lazy"></div>`;
+  }
   return `<div class="match-side-badge mono">${initialsFor(name)}</div>`;
 }
+
+// ClubVerse (@clubverseapp) posts full match videos to YouTube, but titles
+// them with each club's own abbreviation (e.g. "INFC", "FWRS") rather than
+// the full name our game data uses, so a simple name match won't catch most
+// of them. This scores candidates by publish-date proximity plus token/
+// initials overlap on BOTH sides, and only attaches a video when exactly one
+// candidate clears the bar — ambiguous or zero matches show no video at all
+// rather than risk attaching the wrong one.
+let clubverseMatchVideos = [];
+function nameTokens(name){
+  return (name||'').toLowerCase().replace(/\bfc\b|\bfootball club\b|\bunited\b|\bclub\b/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>=4);
+}
+function nameInitials(name){
+  const words = (name||'').replace(/\bfc\b/i,'').split(/\s+/).filter(Boolean);
+  return words.map(w=>w[0]).join('').toUpperCase();
+}
+function findMatchVideo(g){
+  if(g.status !== 'completed' || !clubverseMatchVideos.length) return null;
+  const dayMs = 86400000;
+  const homeTokens = nameTokens(g.home.name);
+  const awayTokens = nameTokens(g.away.name);
+  const homeInit = nameInitials(g.home.name);
+  const awayInit = nameInitials(g.away.name);
+  const scored = clubverseMatchVideos
+    .filter(v => Math.abs(new Date(v.publishedAt).getTime() - g.date) <= dayMs * 4)
+    .map(v => {
+      const titleLower = v.title.toLowerCase();
+      const titleUpper = v.title.toUpperCase();
+      let score = 0;
+      if(homeTokens.some(t => titleLower.includes(t)) || (homeInit.length >= 3 && titleUpper.includes(homeInit))) score++;
+      if(awayTokens.some(t => titleLower.includes(t)) || (awayInit.length >= 3 && titleUpper.includes(awayInit))) score++;
+      return { v, score };
+    })
+    .filter(s => s.score >= 2);
+  return scored.length === 1 ? scored[0].v : null;
+}
+
 function matchCardHTML(g){
   const isLive = g.status === 'live';
   const hasScore = g.home.score != null || g.away.score != null;
@@ -2779,6 +2849,8 @@ function matchCardHTML(g){
     : `<div class="match-vs">VS</div>`;
   const resultBadge = g.result ? `<span class="match-result ${g.result}">${g.result}</span>` : '';
   const livePill = isLive ? `<span class="match-live-pill"><span class="dot"></span>LIVE</span>` : '';
+  const video = findMatchVideo(g);
+  const watchLink = video ? `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" rel="noopener" class="match-watch-link">▶ Watch</a>` : '';
   return `
     <div class="match-card">
       <div class="match-card-comp">
@@ -2802,6 +2874,7 @@ function matchCardHTML(g){
       <div class="match-card-meta">
         <span>${formatGameDateTime(g.date)}</span>
         ${g.venue ? `<span>${g.venue}</span>` : ''}
+        ${watchLink}
       </div>
     </div>
   `;
@@ -2875,6 +2948,24 @@ async function loadClubverseGames(){
 }
 loadClubverseGames();
 
+async function loadClubverseMatchVideos(){
+  try{
+    const res = await fetch('https://portal.irvingnepalfc.com/api/youtube/clubverse-videos');
+    if(!res.ok) return;
+    const data = await res.json();
+    clubverseMatchVideos = data.videos || [];
+    if(!clubverseMatchVideos.length) return;
+    // Videos load independently of game data — re-render whichever views
+    // already painted so a Watch link can appear without a page reload.
+    renderFixturesTab();
+    const homeList = document.getElementById('homeResultsList');
+    if(homeList && clubverseRecentGames.length){
+      homeList.innerHTML = clubverseRecentGames.slice(0,4).map(matchCardHTML).join('');
+    }
+  }catch(e){}
+}
+loadClubverseMatchVideos();
+
 function tournamentHistoryRowHTML(row){
   const r = row.record;
   const goalDiff = r.goalsFor - r.goalsAgainst;
@@ -2900,6 +2991,10 @@ function tournamentHistoryRowHTML(row){
         <div class="tourney-stat"><b>${r.goalsAgainst}</b><span>Goals Against</span></div>
         <div class="tourney-stat"><b>${goalDiff > 0 ? '+' : ''}${goalDiff}</b><span>Goal Diff.</span></div>
       </div>
+      ${row.publicSlug ? `
+      <a href="https://clubverseapp.com/t/${row.publicSlug}" target="_blank" rel="noopener" class="tourney-record-link">
+        View Full Standings &amp; Bracket on ClubVerse →
+      </a>` : ''}
     </div>
   `;
 }
