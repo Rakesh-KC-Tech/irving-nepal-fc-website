@@ -2978,9 +2978,14 @@ function findOpponentLogo(name){
 // "Team A" / "Team B" / "Our Team" are internal squad-split labels ClubVerse
 // uses for scrimmages — both sides are Irving Nepal FC players, not a real
 // opponent, so both get the real club crest rather than a monogram.
-const INTERNAL_SQUAD_NAMES = ['irving nepal fc', 'team a', 'team b', 'our team'];
+const TEAM_B_CREST_URL = 'https://portal.irvingnepalfc.com/crest-team-b.webp';
+const INTERNAL_SQUAD_NAMES = ['irving nepal fc', 'team a', 'our team'];
 function sideBadgeHTML(name){
-  if(INTERNAL_SQUAD_NAMES.includes((name||'').toLowerCase().trim())){
+  const normalized = (name||'').toLowerCase().trim();
+  if(normalized === 'team b'){
+    return `<div class="match-side-badge"><img src="${TEAM_B_CREST_URL}" alt="Team B crest"></div>`;
+  }
+  if(INTERNAL_SQUAD_NAMES.includes(normalized)){
     return `<div class="match-side-badge"><img src="${OUR_CREST_URL}" alt="Irving Nepal FC crest"></div>`;
   }
   const logoUrl = findOpponentLogo(name);
