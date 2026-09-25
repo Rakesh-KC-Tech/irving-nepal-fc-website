@@ -3071,13 +3071,19 @@ function updateHomepageMatchStats(recentGames){
   const played = decided.length;
   const winRate = played > 0 ? Math.round((wins / played) * 100) : null;
 
+  // Also update data-countup, not just the visible text — the scroll-
+  // triggered count-up animation (see animateCountUp below) reads that
+  // attribute whenever this element first scrolls into view, and it only
+  // fires once. Leaving it at its hardcoded "0" default meant any visitor
+  // who scrolled here *after* this fetch resolved got the real number
+  // overwritten back down to 0 the moment it animated in.
   ['statsMatchesPlayed1','statsMatchesPlayed2'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.textContent = String(played);
+    if(el){ el.textContent = String(played); el.setAttribute('data-countup', String(played)); }
   });
   ['statsWins1','statsWins2'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.textContent = String(wins);
+    if(el){ el.textContent = String(wins); el.setAttribute('data-countup', String(wins)); }
   });
   const winRateEl = document.getElementById('statsWinRate');
   if(winRateEl) winRateEl.textContent = winRate != null ? `${winRate}%` : '—';
@@ -3242,7 +3248,11 @@ async function loadClubverseClub(){
       const text = `${club.memberCount}+`;
       ['memberCountStat1','memberCountStat2','memberCountStat3'].forEach(id=>{
         const el = document.getElementById(id);
-        if(el) el.textContent = text;
+        if(!el) return;
+        el.textContent = text;
+        // Same fix as match stats — keep the count-up animation's target in
+        // sync so a later scroll-into-view doesn't reset this back to 0.
+        if(el.hasAttribute('data-countup')) el.setAttribute('data-countup', String(club.memberCount));
       });
     }
 
