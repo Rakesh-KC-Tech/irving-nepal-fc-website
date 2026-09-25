@@ -728,20 +728,15 @@
   }
   .rm-month-pill.active.has-data::after{background:#fff;}
 
-  /* Practice/training sessions on the calendar — deliberately lighter-weight
-     than .match-card (no crests/score) since there's no real opponent, just
-     an internal squad session. Keeps the calendar honest about what's an
-     actual fixture versus day-to-day club activity. */
+  /* Practice/training scrimmages on the calendar — same crest-badge layout
+     as .match-card (reuses .match-card-comp/.match-card-body/.match-card-
+     meta directly) since it's still Irving Nepal FC on both sides, just
+     marked with a gold left border instead of the crimson/gold top accent
+     so it reads as "internal session" rather than a real fixture. */
   .practice-card{
     background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);
-    padding:18px 20px;display:flex;align-items:center;gap:14px;
+    padding:22px 20px 18px;position:relative;overflow:hidden;
   }
-  .practice-card-badge{font-size:22px;flex-shrink:0;opacity:0.85;}
-  .practice-card-body{flex:1;min-width:0;}
-  .practice-card-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-  .practice-card-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:#fff;}
-  .practice-card-meta{font-size:12px;color:var(--mist);margin-top:3px;}
-  .practice-card-venue{font-size:11px;color:var(--mist-dim);margin-top:2px;}
 
   /* Empty months (including any future month up through next year, so the
      calendar always shows a full year ahead even before ClubVerse has
@@ -3125,16 +3120,34 @@ function practiceCardHTML(g, index){
     : g.status === 'scheduled'
       ? `<span class="match-status-pill upcoming">Upcoming</span>`
       : '';
+  const hasScore = g.home.score != null || g.away.score != null;
+  const centerHTML = hasScore
+    ? `<div class="match-score">${g.home.score ?? 0} – ${g.away.score ?? 0}</div>`
+    : `<div class="match-vs">VS</div>`;
+  // Same crest-badge layout as matchCardHTML (sideBadgeHTML already maps
+  // "Team A"/"Team B"/"Our Team" to the real club crest) — a scrimmage is
+  // still Irving Nepal FC on both sides, so it should look like it, not a
+  // bare icon with no team info at all.
   return `
     <div class="practice-card"${staggerStyle} data-game-id="${g.id}">
-      <div class="practice-card-badge">🏃</div>
-      <div class="practice-card-body">
-        <div class="practice-card-title-row">
-          <div class="practice-card-title">${g.competition}</div>
-          ${statusPill}
+      <div class="match-card-comp">
+        <span>${g.competition}</span>
+        ${statusPill}
+      </div>
+      <div class="match-card-body">
+        <div class="match-side">
+          ${sideBadgeHTML(g.home.name)}
+          <span class="match-side-name">${g.home.name}</span>
         </div>
-        <div class="practice-card-meta">${formatGameDateTime(g.date)}</div>
-        ${g.venue ? `<div class="practice-card-venue">${g.venue}</div>` : ''}
+        <div class="match-center">${centerHTML}</div>
+        <div class="match-side">
+          ${sideBadgeHTML(g.away.name)}
+          <span class="match-side-name">${g.away.name}</span>
+        </div>
+      </div>
+      <div class="match-card-meta">
+        <span>${formatGameDateTime(g.date)}</span>
+        ${g.venue ? `<span>${g.venue}</span>` : ''}
       </div>
     </div>
   `;
