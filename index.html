@@ -631,6 +631,12 @@
   }
   .match-live-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--crimson-2);animation:matchLivePulse 1.4s infinite;}
   @keyframes matchLivePulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
+  .match-status-pill{
+    display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;letter-spacing:1px;
+    text-transform:uppercase;font-family:'Oswald',sans-serif;flex-shrink:0;
+  }
+  .match-status-pill.completed{background:rgba(147,160,201,0.15);color:var(--mist);}
+  .match-status-pill.upcoming{background:rgba(216,180,106,0.15);color:var(--gold);}
   .match-card-body{display:flex;align-items:center;justify-content:space-between;gap:10px;}
   .match-side{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;min-width:0;}
   .match-side-badge{
@@ -712,6 +718,8 @@
     padding:18px 20px;display:flex;align-items:center;gap:14px;
   }
   .practice-card-badge{font-size:22px;flex-shrink:0;opacity:0.85;}
+  .practice-card-body{flex:1;min-width:0;}
+  .practice-card-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
   .practice-card-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:#fff;}
   .practice-card-meta{font-size:12px;color:var(--mist);margin-top:3px;}
   .practice-card-venue{font-size:11px;color:var(--mist-dim);margin-top:2px;}
@@ -2948,7 +2956,13 @@ function matchCardHTML(g, index){
     ? `<div class="match-score">${g.home.score ?? 0} – ${g.away.score ?? 0}</div>`
     : `<div class="match-vs">VS</div>`;
   const resultBadge = g.result ? `<span class="match-result ${g.result}">${g.result}</span>` : '';
-  const livePill = isLive ? `<span class="match-live-pill"><span class="dot"></span>LIVE</span>` : '';
+  const statusPill = isLive
+    ? `<span class="match-live-pill"><span class="dot"></span>LIVE</span>`
+    : g.status === 'completed'
+      ? `<span class="match-status-pill completed">Completed</span>`
+      : g.status === 'scheduled'
+        ? `<span class="match-status-pill upcoming">Upcoming</span>`
+        : '';
   const video = findMatchVideo(g);
   const watchLink = video ? `<a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" rel="noopener" class="match-watch-link">▶ Watch</a>` : '';
   const staggerStyle = index != null ? ` style="--i:${index}"` : '';
@@ -2956,7 +2970,7 @@ function matchCardHTML(g, index){
     <div class="match-card"${staggerStyle}>
       <div class="match-card-comp">
         <span>${g.competition}${g.phase ? ' · ' + g.phase.replace(/_/g,' ') : ''}</span>
-        ${livePill}
+        ${statusPill}
       </div>
       <div class="match-card-body">
         <div class="match-side">
@@ -3024,11 +3038,19 @@ function isRealFixture(g){
 
 function practiceCardHTML(g, index){
   const staggerStyle = index != null ? ` style="--i:${index}"` : '';
+  const statusPill = g.status === 'completed'
+    ? `<span class="match-status-pill completed">Completed</span>`
+    : g.status === 'scheduled'
+      ? `<span class="match-status-pill upcoming">Upcoming</span>`
+      : '';
   return `
     <div class="practice-card"${staggerStyle}>
       <div class="practice-card-badge">🏃</div>
       <div class="practice-card-body">
-        <div class="practice-card-title">${g.competition}</div>
+        <div class="practice-card-title-row">
+          <div class="practice-card-title">${g.competition}</div>
+          ${statusPill}
+        </div>
         <div class="practice-card-meta">${formatGameDateTime(g.date)}</div>
         ${g.venue ? `<div class="practice-card-venue">${g.venue}</div>` : ''}
       </div>
