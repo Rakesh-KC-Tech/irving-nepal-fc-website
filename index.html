@@ -1319,10 +1319,16 @@
   @media(max-width:1080px){
     .hero-grid{grid-template-columns:1fr;}
     .hero-crest{order:-1;height:340px;}
+    /* The crest reordering above makes .hero much taller once stacked, so
+       the scroll-cue's fixed bottom:28px anchor lands on top of the stats
+       row instead of at the true bottom of the hero — simplest fix is to
+       just not show it once there's this much stacked content to see. */
+    .scroll-cue{display:none;}
     .match-row{grid-template-columns:1fr 1fr;}
     .team-grid{grid-template-columns:repeat(3,1fr);}
     .news-grid{grid-template-columns:1fr 1fr;}
     .news-grid .feature{grid-column:span 2;}
+    .news-page-grid{grid-template-columns:1fr 1fr;}
     .shop-grid{grid-template-columns:repeat(3,1fr);}
     .foot-grid{grid-template-columns:1fr 1fr;}
     .gallery-grid{grid-template-columns:repeat(3,1fr);}
@@ -1338,6 +1344,7 @@
     .team-grid{grid-template-columns:1fr 1fr;}
     .news-grid{grid-template-columns:1fr;}
     .news-grid .feature{grid-column:span 1;}
+    .news-page-grid{grid-template-columns:1fr;}
     .shop-grid{grid-template-columns:1fr 1fr;}
     .foot-grid{grid-template-columns:1fr 1fr;}
     .gallery-grid{grid-template-columns:1fr 1fr;}
