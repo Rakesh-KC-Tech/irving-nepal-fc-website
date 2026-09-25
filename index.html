@@ -607,8 +607,10 @@
   .match-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);margin-bottom:32px;}
   .match-tab-btn{
     font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;
-    padding:14px 24px;color:var(--mist);border-bottom:2px solid transparent;transition:all .2s;background:none;cursor:pointer;
+    padding:14px 24px;color:var(--mist);border-bottom:2px solid transparent;background:none;cursor:pointer;
+    transition:color .25s ease, transform .25s ease;position:relative;
   }
+  .match-tab-btn:hover{color:#fff;transform:translateY(-1px);}
   .match-tab-btn.active{color:var(--white);border-color:var(--crimson-2);}
   .match-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
   .match-card{
@@ -662,9 +664,12 @@
   .fixtures-view-toggle{display:flex;gap:8px;margin-bottom:28px;}
   .view-toggle-btn{
     font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
-    padding:9px 22px;background:var(--panel);border:1px solid var(--line);color:var(--mist);transition:all .2s;cursor:pointer;
+    padding:9px 22px;background:var(--panel);border:1px solid var(--line);color:var(--mist);cursor:pointer;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
   }
-  .view-toggle-btn.active,.view-toggle-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+  .view-toggle-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);transform:translateY(-2px);box-shadow:0 8px 18px rgba(216,30,61,0.3);}
+  .view-toggle-btn.active{background:var(--crimson);color:#fff;border-color:var(--crimson);transform:scale(1.05);box-shadow:0 6px 16px rgba(216,30,61,0.35);}
+  .view-toggle-btn:active{transform:scale(0.96);}
 
   /* Real Madrid-style month strip: horizontal scrollable pill row + a card
      grid filtered to whichever month is selected. */
@@ -674,18 +679,29 @@
   }
   .rm-cal-months::-webkit-scrollbar{display:none;}
   .rm-cal-scroll-btn{
-    width:34px;height:34px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:#fff;
-    font-size:14px;cursor:pointer;transition:all .2s;flex-shrink:0;
+    width:36px;height:36px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:#fff;
+    font-size:14px;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;
   }
-  .rm-cal-scroll-btn:hover{background:var(--crimson);border-color:var(--crimson);transform:scale(1.08);}
+  .rm-cal-scroll-btn:hover{background:var(--crimson);border-color:var(--crimson);transform:scale(1.15);box-shadow:0 6px 16px rgba(216,30,61,0.4);}
+  .rm-cal-scroll-btn:active{transform:scale(0.92);}
+  /* Stadium/pill shape — a "long box with circular ends" rather than a
+     slightly-rounded rectangle, matching realmadrid.com's month selector. */
   .rm-month-pill{
     font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;
-    padding:9px 18px;border-radius:20px;background:var(--panel);border:1px solid var(--line);color:var(--mist);
-    cursor:pointer;transition:all .25s ease;flex-shrink:0;
+    padding:11px 24px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--mist);
+    cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;position:relative;
   }
-  .rm-month-pill:hover{border-color:var(--gold);color:#fff;}
-  .rm-month-pill.active{background:linear-gradient(135deg,var(--crimson),var(--crimson-2));color:#fff;border-color:var(--crimson-2);
-    box-shadow:0 4px 16px rgba(216,30,61,0.35);}
+  .rm-month-pill:hover{border-color:var(--gold);color:#fff;transform:translateY(-3px);}
+  .rm-month-pill:active{transform:translateY(-1px) scale(0.96);}
+  .rm-month-pill.active{
+    background:linear-gradient(135deg,var(--crimson),var(--crimson-2));color:#fff;border-color:var(--crimson-2);
+    box-shadow:0 6px 18px rgba(216,30,61,0.4);transform:scale(1.08);
+  }
+  .rm-month-pill.has-data::after{
+    content:'';position:absolute;bottom:7px;left:50%;transform:translateX(-50%);
+    width:4px;height:4px;border-radius:50%;background:var(--gold);transition:background .3s ease;
+  }
+  .rm-month-pill.active.has-data::after{background:#fff;}
 
   /* Practice/training sessions on the calendar — deliberately lighter-weight
      than .match-card (no crests/score) since there's no real opponent, just
@@ -699,6 +715,18 @@
   .practice-card-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:#fff;}
   .practice-card-meta{font-size:12px;color:var(--mist);margin-top:3px;}
   .practice-card-venue{font-size:11px;color:var(--mist-dim);margin-top:2px;}
+
+  /* Empty months (including any future month up through next year, so the
+     calendar always shows a full year ahead even before ClubVerse has
+     posted anything for it) */
+  .calendar-empty-state{
+    grid-column:1/-1;text-align:center;padding:64px 20px;
+    background:var(--panel);border:1px dashed var(--line);
+  }
+  .calendar-empty-icon{font-size:38px;margin-bottom:14px;animation:calendarEmptyPulse 2.4s ease-in-out infinite;}
+  @keyframes calendarEmptyPulse{0%,100%{opacity:0.55;transform:scale(1);}50%{opacity:1;transform:scale(1.1);}}
+  .calendar-empty-state p{font-family:'Oswald',sans-serif;font-size:17px;letter-spacing:0.5px;color:#fff;margin-bottom:6px;}
+  .calendar-empty-state span{font-size:13px;color:var(--mist);}
 
   /* Staggered fade/rise entrance — applied whenever a match grid is
      (re)populated (month switch, tab switch), matching the ask for real
@@ -3014,35 +3042,55 @@ function practiceCardHTML(g, index){
 // visually identical, just grouped differently.
 let calSelectedMonthKey = null;
 
-function getCalendarActivityMonths(){
-  const seen = new Map();
+// A full continuous run of months — from the earliest month we actually
+// have ClubVerse data for, through December of next year — not just the
+// months that happen to have a game in them. Months with nothing yet still
+// get a pill; selecting one just shows a "coming soon" state instead of an
+// empty grid or a missing tab.
+function getCalendarMonthRange(){
+  const now = new Date();
+  let earliestMs = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   clubverseAllGames.forEach(g=>{
     const d = new Date(g.date);
-    const key = `${d.getFullYear()}-${d.getMonth()}`;
-    if(!seen.has(key)){
-      seen.set(key, { key, year:d.getFullYear(), month:d.getMonth(), sortMs:new Date(d.getFullYear(), d.getMonth(), 1).getTime() });
-    }
+    const monthStart = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+    if(monthStart < earliestMs) earliestMs = monthStart;
   });
-  return [...seen.values()].sort((a,b)=>a.sortMs-b.sortMs);
+  const endMs = new Date(now.getFullYear() + 1, 11, 1).getTime();
+
+  const months = [];
+  const cursor = new Date(earliestMs);
+  while(cursor.getTime() <= endMs){
+    const year = cursor.getFullYear();
+    const month = cursor.getMonth();
+    const hasData = clubverseAllGames.some(g=>{
+      const d = new Date(g.date);
+      return d.getFullYear() === year && d.getMonth() === month;
+    });
+    months.push({ key:`${year}-${month}`, year, month, sortMs:cursor.getTime(), hasData });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return months;
 }
 
 function renderCalendarMonths(){
   const container = document.getElementById('rmCalMonths');
   if(!container) return;
-  const months = getCalendarActivityMonths();
+  const months = getCalendarMonthRange();
   if(!months.length){ container.innerHTML = ''; return; }
 
   if(!calSelectedMonthKey || !months.some(m=>m.key === calSelectedMonthKey)){
     const now = new Date();
     const nowKey = `${now.getFullYear()}-${now.getMonth()}`;
-    calSelectedMonthKey = months.find(m=>m.key === nowKey)?.key
-      || months.find(m=>m.sortMs >= now.getTime())?.key
-      || months[months.length - 1].key;
+    calSelectedMonthKey = months.find(m=>m.key === nowKey)?.key || months[0].key;
   }
 
   container.innerHTML = months.map(m=>{
-    const label = new Date(m.year, m.month, 1).toLocaleDateString('en-US', { month:'short' });
-    return `<button type="button" class="rm-month-pill${m.key === calSelectedMonthKey ? ' active' : ''}" data-key="${m.key}">${label}</button>`;
+    const monthAbbrev = new Date(m.year, m.month, 1).toLocaleDateString('en-US', { month:'short' });
+    const label = `${monthAbbrev} '${String(m.year).slice(-2)}`;
+    const classes = ['rm-month-pill'];
+    if(m.key === calSelectedMonthKey) classes.push('active');
+    if(m.hasData) classes.push('has-data');
+    return `<button type="button" class="${classes.join(' ')}" data-key="${m.key}">${label}</button>`;
   }).join('');
 
   container.querySelectorAll('.rm-month-pill').forEach(btn=>{
@@ -3068,9 +3116,18 @@ function renderCalendarGrid(){
 
   grid.classList.remove('stagger-fade-in');
   void grid.offsetWidth; // restart the entrance animation on every re-render
-  grid.innerHTML = games.length
-    ? games.map((g,idx)=> isRealFixture(g) ? matchCardHTML(g,idx) : practiceCardHTML(g,idx)).join('')
-    : '<p class="news-empty">No club activity this month.</p>';
+  if(!games.length){
+    const monthLabel = new Date(year, month, 1).toLocaleDateString('en-US', { month:'long', year:'numeric' });
+    grid.innerHTML = `
+      <div class="calendar-empty-state">
+        <div class="calendar-empty-icon">📅</div>
+        <p>Match schedule coming soon</p>
+        <span>ClubVerse hasn't posted anything for ${monthLabel} yet — check back soon.</span>
+      </div>`;
+    grid.classList.add('stagger-fade-in');
+    return;
+  }
+  grid.innerHTML = games.map((g,idx)=> isRealFixture(g) ? matchCardHTML(g,idx) : practiceCardHTML(g,idx)).join('');
   grid.classList.add('stagger-fade-in');
 }
 
