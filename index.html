@@ -657,6 +657,51 @@
   }
   .match-watch-link{color:var(--crimson-2);font-weight:600;text-decoration:none;letter-spacing:0.3px;}
   .match-watch-link:hover{text-decoration:underline;}
+
+  /* ===== FIXTURES: LIST/CALENDAR TOGGLE + CALENDAR ===== */
+  .fixtures-view-toggle{display:flex;gap:8px;margin-bottom:28px;}
+  .view-toggle-btn{
+    font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;
+    padding:9px 22px;background:var(--panel);border:1px solid var(--line);color:var(--mist);transition:all .2s;cursor:pointer;
+  }
+  .view-toggle-btn.active,.view-toggle-btn:hover{background:var(--crimson);color:#fff;border-color:var(--crimson);}
+  .calendar-nav{display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:24px;}
+  .calendar-nav-btn{
+    width:36px;height:36px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:#fff;
+    font-size:16px;cursor:pointer;transition:all .2s;
+  }
+  .calendar-nav-btn:hover{background:var(--crimson);border-color:var(--crimson);}
+  .calendar-month-label{font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:1px;min-width:220px;text-align:center;}
+  .calendar-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;}
+  .calendar-weekdays span{
+    display:block;text-align:center;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--mist-dim);padding-bottom:8px;
+  }
+  .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .calendar-day{background:var(--panel);border:1px solid var(--line);min-height:96px;padding:8px;position:relative;}
+  .calendar-day.other-month{opacity:0.35;}
+  .calendar-day.today{border-color:var(--gold);}
+  .calendar-day-num{font-family:'Teko',sans-serif;font-size:18px;color:var(--mist);}
+  .calendar-day.today .calendar-day-num{color:var(--gold);}
+  .calendar-match-pill{
+    display:block;width:100%;margin-top:6px;padding:4px 6px;border-radius:3px;font-size:10px;text-align:left;
+    background:rgba(255,255,255,0.06);border-left:3px solid var(--mist);color:#fff;cursor:pointer;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background .2s;
+  }
+  .calendar-match-pill:hover{background:rgba(255,255,255,0.14);}
+  .calendar-match-pill.result-W{border-left-color:#2ecc71;}
+  .calendar-match-pill.result-D{border-left-color:var(--mist);}
+  .calendar-match-pill.result-L{border-left-color:var(--crimson-2);}
+  .calendar-match-pill.upcoming{border-left-color:var(--gold);}
+  .calendar-more-link{display:block;margin-top:4px;font-size:9.5px;color:var(--mist-dim);text-align:left;background:none;cursor:pointer;}
+  .calendar-selected-match{margin-top:28px;max-width:460px;}
+  @media(max-width:760px){
+    .calendar-day{min-height:64px;padding:5px;}
+    .calendar-day-num{font-size:14px;}
+    .calendar-match-pill{font-size:8.5px;padding:2px 4px;}
+    .calendar-weekdays span{font-size:9px;}
+    .calendar-month-label{font-size:16px;min-width:160px;}
+  }
   @media(max-width:760px){.match-grid{grid-template-columns:1fr;}}
 
   /* ===== NEWS PAGE ===== */
@@ -1649,11 +1694,31 @@
 
   <section class="pad">
     <div class="wrap">
-      <div class="match-tabs" id="fixturesTabs">
-        <button class="match-tab-btn active" data-tab="upcoming" type="button">Upcoming Fixtures</button>
-        <button class="match-tab-btn" data-tab="recent" type="button">Recent Results</button>
+      <div class="fixtures-view-toggle" id="fixturesViewToggle">
+        <button class="view-toggle-btn active" data-view="list" type="button">List</button>
+        <button class="view-toggle-btn" data-view="calendar" type="button">Calendar</button>
       </div>
-      <div class="match-grid" id="fixturesMatchGrid"></div>
+
+      <div id="fixturesListView">
+        <div class="match-tabs" id="fixturesTabs">
+          <button class="match-tab-btn active" data-tab="upcoming" type="button">Upcoming Fixtures</button>
+          <button class="match-tab-btn" data-tab="recent" type="button">Recent Results</button>
+        </div>
+        <div class="match-grid" id="fixturesMatchGrid"></div>
+      </div>
+
+      <div id="fixturesCalendarView" style="display:none;">
+        <div class="calendar-nav">
+          <button class="calendar-nav-btn" id="calPrevBtn" type="button" aria-label="Previous month">←</button>
+          <div class="calendar-month-label" id="calMonthLabel"></div>
+          <button class="calendar-nav-btn" id="calNextBtn" type="button" aria-label="Next month">→</button>
+        </div>
+        <div class="calendar-weekdays">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-selected-match" id="calendarSelectedMatch"></div>
+      </div>
     </div>
   </section>
 
@@ -2899,6 +2964,110 @@ document.querySelectorAll('#fixturesTabs .match-tab-btn').forEach(btn=>{
     btn.classList.add('active');
     fixturesActiveTab = btn.getAttribute('data-tab');
     renderFixturesTab();
+  });
+});
+
+/* ---------------- FIXTURES: LIST/CALENDAR TOGGLE + CALENDAR ---------------- */
+// In-house scrimmages ("Team A vs Team B", weekly practice/drill sessions)
+// are real ClubVerse events but not real fixtures — a completed game only
+// counts here if it has a recorded result, and anything still to come is
+// excluded only when it's clearly a recurring practice/drill session.
+const PLACEHOLDER_COMPETITION_PATTERN = /practice|drill/i;
+function isRealFixture(g){
+  if(PLACEHOLDER_COMPETITION_PATTERN.test(g.competition)) return false;
+  if(g.status === 'completed') return g.result != null;
+  return true;
+}
+
+let calendarYear, calendarMonth;
+(function(){
+  const now = new Date();
+  calendarYear = now.getFullYear();
+  calendarMonth = now.getMonth();
+})();
+
+function calendarGamesForDay(year, month, day){
+  return clubverseAllGames.filter(g=>{
+    if(!isRealFixture(g)) return false;
+    const d = new Date(g.date);
+    return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
+  });
+}
+
+function calendarPillHTML(g){
+  const isUs = g.home.name === 'Irving Nepal FC';
+  const opponent = isUs ? g.away.name : g.home.name;
+  const ourScore = isUs ? g.home.score : g.away.score;
+  const oppScore = isUs ? g.away.score : g.home.score;
+  const cls = g.status === 'completed' && g.result ? `result-${g.result}` : 'upcoming';
+  const label = g.status === 'completed'
+    ? `${ourScore ?? '-'}-${oppScore ?? '-'} vs ${opponent}`
+    : `vs ${opponent}`;
+  return `<button type="button" class="calendar-match-pill ${cls}" data-game-id="${g.id}">${label}</button>`;
+}
+
+function renderCalendarSelectedMatch(gameId){
+  const panel = document.getElementById('calendarSelectedMatch');
+  const game = clubverseAllGames.find(g=>g.id === gameId);
+  panel.innerHTML = game ? matchCardHTML(game) : '';
+  panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function renderCalendarMonth(){
+  const grid = document.getElementById('calendarGrid');
+  const label = document.getElementById('calMonthLabel');
+  if(!grid || !label) return;
+
+  label.textContent = new Date(calendarYear, calendarMonth, 1).toLocaleDateString('en-US', { month:'long', year:'numeric' });
+
+  const firstOfMonth = new Date(calendarYear, calendarMonth, 1);
+  const startDay = new Date(firstOfMonth);
+  startDay.setDate(startDay.getDate() - startDay.getDay());
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const cellCount = Math.ceil((firstOfMonth.getDay() + daysInMonth) / 7) * 7;
+
+  const today = new Date();
+  let html = '';
+  const cursor = new Date(startDay);
+  for(let i = 0; i < cellCount; i++){
+    const isOtherMonth = cursor.getMonth() !== calendarMonth;
+    const isToday = cursor.getFullYear() === today.getFullYear() && cursor.getMonth() === today.getMonth() && cursor.getDate() === today.getDate();
+    const dayGames = isOtherMonth ? [] : calendarGamesForDay(cursor.getFullYear(), cursor.getMonth(), cursor.getDate());
+    const shown = dayGames.slice(0, 2);
+    const extra = dayGames.length - shown.length;
+    html += `
+      <div class="calendar-day${isOtherMonth ? ' other-month' : ''}${isToday ? ' today' : ''}">
+        <div class="calendar-day-num">${cursor.getDate()}</div>
+        ${shown.map(calendarPillHTML).join('')}
+        ${extra > 0 ? `<span class="calendar-more-link">+${extra} more</span>` : ''}
+      </div>`;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  grid.innerHTML = html;
+
+  grid.querySelectorAll('.calendar-match-pill').forEach(btn=>{
+    btn.addEventListener('click', ()=> renderCalendarSelectedMatch(btn.getAttribute('data-game-id')));
+  });
+}
+
+document.getElementById('calPrevBtn')?.addEventListener('click', ()=>{
+  calendarMonth--;
+  if(calendarMonth < 0){ calendarMonth = 11; calendarYear--; }
+  renderCalendarMonth();
+});
+document.getElementById('calNextBtn')?.addEventListener('click', ()=>{
+  calendarMonth++;
+  if(calendarMonth > 11){ calendarMonth = 0; calendarYear++; }
+  renderCalendarMonth();
+});
+document.querySelectorAll('#fixturesViewToggle .view-toggle-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('#fixturesViewToggle .view-toggle-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.getAttribute('data-view');
+    document.getElementById('fixturesListView').style.display = view === 'list' ? '' : 'none';
+    document.getElementById('fixturesCalendarView').style.display = view === 'calendar' ? '' : 'none';
+    if(view === 'calendar') renderCalendarMonth();
   });
 });
 
