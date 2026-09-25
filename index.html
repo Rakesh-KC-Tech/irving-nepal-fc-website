@@ -687,6 +687,19 @@
   .rm-month-pill.active{background:linear-gradient(135deg,var(--crimson),var(--crimson-2));color:#fff;border-color:var(--crimson-2);
     box-shadow:0 4px 16px rgba(216,30,61,0.35);}
 
+  /* Practice/training sessions on the calendar — deliberately lighter-weight
+     than .match-card (no crests/score) since there's no real opponent, just
+     an internal squad session. Keeps the calendar honest about what's an
+     actual fixture versus day-to-day club activity. */
+  .practice-card{
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);
+    padding:18px 20px;display:flex;align-items:center;gap:14px;
+  }
+  .practice-card-badge{font-size:22px;flex-shrink:0;opacity:0.85;}
+  .practice-card-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:#fff;}
+  .practice-card-meta{font-size:12px;color:var(--mist);margin-top:3px;}
+  .practice-card-venue{font-size:11px;color:var(--mist-dim);margin-top:2px;}
+
   /* Staggered fade/rise entrance — applied whenever a match grid is
      (re)populated (month switch, tab switch), matching the ask for real
      motion rather than content just appearing instantly. */
@@ -694,7 +707,7 @@
     from{opacity:0;transform:translateY(18px);}
     to{opacity:1;transform:translateY(0);}
   }
-  .stagger-fade-in .match-card{
+  .stagger-fade-in .match-card,.stagger-fade-in .practice-card{
     opacity:0;
     animation:matchCardIn .55s cubic-bezier(.2,.7,.3,1) forwards;
     animation-delay:calc(var(--i,0) * 70ms);
@@ -1705,6 +1718,7 @@
       </div>
 
       <div id="fixturesCalendarView" style="display:none;">
+        <p style="color:var(--mist);font-size:13px;margin-bottom:20px;">The club's full schedule — competitive matches, practices and other ClubVerse activity, month by month.</p>
         <div class="rm-cal-months-row">
           <button class="rm-cal-scroll-btn" id="rmCalScrollLeft" type="button" aria-label="Scroll months left">←</button>
           <div class="rm-cal-months" id="rmCalMonths"></div>
@@ -2969,11 +2983,29 @@ document.querySelectorAll('#fixturesTabs .match-tab-btn').forEach(btn=>{
 // are real ClubVerse events but not real fixtures — a completed game only
 // counts here if it has a recorded result, and anything still to come is
 // excluded only when it's clearly a recurring practice/drill session.
+// The List tabs (Upcoming Fixtures / Recent Results) only ever show real
+// fixtures; the Calendar view below shows everything ClubVerse has for the
+// club — real fixtures AND practice/training sessions — since that's meant
+// to read as the club's actual day-to-day schedule, not just match results.
 const PLACEHOLDER_COMPETITION_PATTERN = /practice|drill/i;
 function isRealFixture(g){
   if(PLACEHOLDER_COMPETITION_PATTERN.test(g.competition)) return false;
   if(g.status === 'completed') return g.result != null;
   return true;
+}
+
+function practiceCardHTML(g, index){
+  const staggerStyle = index != null ? ` style="--i:${index}"` : '';
+  return `
+    <div class="practice-card"${staggerStyle}>
+      <div class="practice-card-badge">🏃</div>
+      <div class="practice-card-body">
+        <div class="practice-card-title">${g.competition}</div>
+        <div class="practice-card-meta">${formatGameDateTime(g.date)}</div>
+        ${g.venue ? `<div class="practice-card-venue">${g.venue}</div>` : ''}
+      </div>
+    </div>
+  `;
 }
 
 // Real Madrid's own /schedule page is a horizontal month-pill strip above a
@@ -2982,9 +3014,9 @@ function isRealFixture(g){
 // visually identical, just grouped differently.
 let calSelectedMonthKey = null;
 
-function getFixtureMonths(){
+function getCalendarActivityMonths(){
   const seen = new Map();
-  clubverseAllGames.filter(isRealFixture).forEach(g=>{
+  clubverseAllGames.forEach(g=>{
     const d = new Date(g.date);
     const key = `${d.getFullYear()}-${d.getMonth()}`;
     if(!seen.has(key)){
@@ -2997,7 +3029,7 @@ function getFixtureMonths(){
 function renderCalendarMonths(){
   const container = document.getElementById('rmCalMonths');
   if(!container) return;
-  const months = getFixtureMonths();
+  const months = getCalendarActivityMonths();
   if(!months.length){ container.innerHTML = ''; return; }
 
   if(!calSelectedMonthKey || !months.some(m=>m.key === calSelectedMonthKey)){
@@ -3031,15 +3063,14 @@ function renderCalendarGrid(){
   if(!grid || !calSelectedMonthKey) return;
   const [year, month] = calSelectedMonthKey.split('-').map(Number);
   const games = clubverseAllGames
-    .filter(isRealFixture)
     .filter(g=>{ const d = new Date(g.date); return d.getFullYear() === year && d.getMonth() === month; })
     .sort((a,b)=>a.date - b.date);
 
   grid.classList.remove('stagger-fade-in');
   void grid.offsetWidth; // restart the entrance animation on every re-render
   grid.innerHTML = games.length
-    ? games.map((g,idx)=>matchCardHTML(g,idx)).join('')
-    : '<p class="news-empty">No fixtures this month.</p>';
+    ? games.map((g,idx)=> isRealFixture(g) ? matchCardHTML(g,idx) : practiceCardHTML(g,idx)).join('')
+    : '<p class="news-empty">No club activity this month.</p>';
   grid.classList.add('stagger-fade-in');
 }
 
