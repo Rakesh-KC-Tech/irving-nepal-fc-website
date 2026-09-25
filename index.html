@@ -945,14 +945,23 @@
   @media(max-width:1080px){.tourney-teaser-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:760px){.tourney-teaser-grid{grid-template-columns:1fr;}}
 
-  /* ClubVerse live data widgets (tournament history — match cards now use .match-* above) */
-  .cv-history-row{
-    background:var(--panel);border:1px solid var(--line);padding:16px 20px;
-    display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:10px;flex-wrap:wrap;
+  /* ClubVerse live data widget: per-tournament record card (match cards use .match-* above) */
+  .tourney-record-card{
+    background:var(--panel);border:1px solid var(--line);padding:20px 22px;margin-bottom:14px;
+    position:relative;overflow:hidden;
   }
-  .cv-history-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;}
-  .cv-history-meta{font-size:12px;color:var(--mist);margin-top:3px;}
-  .cv-history-record{font-family:'Teko',sans-serif;font-size:19px;color:#fff;white-space:nowrap;}
+  .tourney-record-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--crimson),var(--gold));
+  }
+  .tourney-record-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
+  .tourney-record-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+  .tourney-record-meta{font-size:12px;color:var(--mist);margin-top:4px;}
+  .tourney-record-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
+  .tourney-stat{background:var(--navy-2);border:1px solid var(--line);padding:10px 6px;text-align:center;}
+  .tourney-stat b{display:block;font-family:'Teko',sans-serif;font-size:22px;color:#fff;}
+  .tourney-stat span{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mist);}
+  @media(max-width:760px){.tourney-record-stats{grid-template-columns:repeat(4,1fr);}}
 
   /* Photo lightbox — full-screen enlarge for Gallery images */
   .lightbox-overlay{
@@ -2868,18 +2877,29 @@ loadClubverseGames();
 
 function tournamentHistoryRowHTML(row){
   const r = row.record;
-  const champBadge = row.champion ? '<span class="tourney-status st-live" style="margin-left:10px;"><span class="dot"></span>Champion</span>' : '';
+  const goalDiff = r.goalsFor - r.goalsAgainst;
+  const champBadge = row.champion ? '<span class="tourney-status st-live"><span class="dot"></span>Champion</span>' : '';
   const ongoingBadge = row.status && row.status !== 'COMPLETED'
-    ? '<span class="tourney-status st-upcoming" style="margin-left:10px;"><span class="dot"></span>Ongoing</span>' : '';
+    ? '<span class="tourney-status st-upcoming"><span class="dot"></span>Ongoing</span>' : '';
   const startText = row.startDate ? new Date(row.startDate).toLocaleDateString('en-US', { month:'short', year:'numeric' }) : '';
   const metaParts = [row.categoryName, row.stage, startText].filter(Boolean);
   return `
-    <div class="cv-history-row">
-      <div>
-        <div class="cv-history-name">${row.tournamentName}${champBadge}${ongoingBadge}</div>
-        <div class="cv-history-meta">${metaParts.join(' · ')}</div>
+    <div class="tourney-record-card">
+      <div class="tourney-record-head">
+        <div>
+          <div class="tourney-record-name">${row.tournamentName}${champBadge}${ongoingBadge}</div>
+          <div class="tourney-record-meta">${metaParts.join(' · ')}</div>
+        </div>
       </div>
-      <div class="cv-history-record">${r.won}W–${r.drawn}D–${r.lost}L <span style="color:var(--mist);font-size:15px;">(${r.goalsFor}–${r.goalsAgainst})</span></div>
+      <div class="tourney-record-stats">
+        <div class="tourney-stat"><b>${r.played}</b><span>Played</span></div>
+        <div class="tourney-stat"><b>${r.won}</b><span>Won</span></div>
+        <div class="tourney-stat"><b>${r.drawn}</b><span>Drawn</span></div>
+        <div class="tourney-stat"><b>${r.lost}</b><span>Lost</span></div>
+        <div class="tourney-stat"><b>${r.goalsFor}</b><span>Goals For</span></div>
+        <div class="tourney-stat"><b>${r.goalsAgainst}</b><span>Goals Against</span></div>
+        <div class="tourney-stat"><b>${goalDiff > 0 ? '+' : ''}${goalDiff}</b><span>Goal Diff.</span></div>
+      </div>
     </div>
   `;
 }
