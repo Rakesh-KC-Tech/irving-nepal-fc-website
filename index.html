@@ -199,6 +199,15 @@
     font-family:'Inter',sans-serif;
   }
   .burger{display:none;background:none;color:#fff;font-size:24px;}
+  nav.links.nav-open{
+    display:flex !important;flex-direction:column;position:fixed;top:78px;left:0;right:0;
+    background:#0a1330;padding:20px 32px;border-bottom:1px solid rgba(255,255,255,0.08);
+    max-height:calc(100vh - 78px);overflow-y:auto;z-index:999;
+  }
+  .nav-backdrop{
+    display:none;position:fixed;top:78px;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:998;
+  }
+  .nav-backdrop.show{display:block;}
 
   /* ===== Small-phone fixes: keep the fixed header from ever exceeding
      the viewport width, which otherwise forces mobile browsers to zoom
@@ -1592,6 +1601,7 @@
     </div>
   </div>
 </header>
+<div class="nav-backdrop" id="navBackdrop"></div>
 
 <!-- ===================== HOME ===================== -->
 <main id="home-view" class="view active">
@@ -2631,7 +2641,7 @@ function showView(name){
     a.classList.toggle('active', a.dataset.nav===name);
   });
   window.scrollTo({top:0, behavior:"instant"});
-  document.getElementById('navLinks').classList.remove('open-mobile');
+  closeMobileNav();
 }
 document.querySelectorAll('[data-nav]').forEach(el=>{
   el.addEventListener('click', e=>{
@@ -2639,10 +2649,29 @@ document.querySelectorAll('[data-nav]').forEach(el=>{
     showView(el.dataset.nav);
   });
 });
+
+// The mobile burger menu previously toggled via inline styles while
+// showView() tried to close it by removing a CSS class that nothing ever
+// applied — so tapping a nav link never actually closed the menu, leaving
+// it stuck over the page. This uses one class-based mechanism for both,
+// plus a click-outside backdrop, body scroll lock, and Escape to close.
+function openMobileNav(){
+  document.getElementById('navLinks').classList.add('nav-open');
+  document.getElementById('navBackdrop').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileNav(){
+  document.getElementById('navLinks').classList.remove('nav-open');
+  document.getElementById('navBackdrop').classList.remove('show');
+  document.body.style.overflow = '';
+}
 document.getElementById('burgerBtn').addEventListener('click', ()=>{
   const nav = document.getElementById('navLinks');
-  nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
-  nav.style.cssText += 'position:fixed;top:78px;left:0;right:0;background:#0a1330;flex-direction:column;padding:20px 32px;border-bottom:1px solid rgba(255,255,255,0.08);';
+  if(nav.classList.contains('nav-open')) closeMobileNav(); else openMobileNav();
+});
+document.getElementById('navBackdrop').addEventListener('click', closeMobileNav);
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') closeMobileNav();
 });
 
 /* ---------------- RENDER: TEAM ---------------- */
