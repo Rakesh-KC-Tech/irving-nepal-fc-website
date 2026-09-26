@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This site is a single-page app — every section (Team, Fixtures,
+  Tournaments, etc.) lives at this one URL with JavaScript swapping which
+  section is visible, so there is only one real crawlable URL here today.
+  Real per-article content with its own URLs lives on the portal
+  (portal.irvingnepalfc.com/news/...), which has its own sitemap.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://irvingnepalfc.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
