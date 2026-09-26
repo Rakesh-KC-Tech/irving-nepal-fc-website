@@ -758,37 +758,57 @@
   .view-toggle-btn.active{background:var(--crimson);color:#fff;border-color:var(--crimson);transform:scale(1.05);box-shadow:0 6px 16px rgba(216,30,61,0.35);}
   .view-toggle-btn:active{transform:scale(0.96);}
 
-  /* Real Madrid-style month strip: horizontal scrollable pill row + a card
-     grid filtered to whichever month is selected. */
-  .rm-cal-months-row{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
-  .rm-cal-months{
-    display:flex;gap:8px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;flex:1;
+  /* Real Madrid-style date timeline: a continuous horizontal rail with
+     individual day nodes (day-of-week / day number / month + matchday dot)
+     riding on top of it, rather than the old month-pill strip. Each node
+     is a real ClubVerse date that actually has a match or practice on it —
+     no fabricated "empty day" placeholders. */
+  .date-timeline-wrap{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+  .date-timeline-viewport{
+    flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;cursor:grab;
   }
-  .rm-cal-months::-webkit-scrollbar{display:none;}
+  .date-timeline-viewport::-webkit-scrollbar{display:none;}
+  .date-timeline-viewport.dragging{cursor:grabbing;scroll-behavior:auto;user-select:none;}
+  .date-timeline-track{
+    display:flex;align-items:center;gap:14px;padding:14px 10px;position:relative;min-width:min-content;
+  }
+  .date-timeline-track::before{
+    content:'';position:absolute;left:22px;right:22px;top:50%;transform:translateY(-1px);
+    height:2px;border-radius:999px;
+    background:linear-gradient(90deg, transparent, var(--line) 8%, var(--line) 92%, transparent);
+    z-index:0;
+  }
   .rm-cal-scroll-btn{
     width:36px;height:36px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:#fff;
     font-size:14px;cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;
   }
   .rm-cal-scroll-btn:hover{background:var(--crimson);border-color:var(--crimson);transform:scale(1.15);box-shadow:0 6px 16px rgba(216,30,61,0.4);}
   .rm-cal-scroll-btn:active{transform:scale(0.92);}
-  /* Stadium/pill shape — a "long box with circular ends" rather than a
-     slightly-rounded rectangle, matching realmadrid.com's month selector. */
-  .rm-month-pill{
-    font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;
-    padding:11px 24px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--mist);
-    cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;position:relative;
+  .date-node{
+    position:relative;z-index:1;flex-shrink:0;width:62px;scroll-snap-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:13px 4px 11px;background:var(--panel);border:1px solid var(--line);color:var(--mist);
+    cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);
   }
-  .rm-month-pill:hover{border-color:var(--gold);color:#fff;transform:translateY(-3px);}
-  .rm-month-pill:active{transform:translateY(-1px) scale(0.96);}
-  .rm-month-pill.active{
-    background:linear-gradient(135deg,var(--crimson),var(--crimson-2));color:#fff;border-color:var(--crimson-2);
-    box-shadow:0 6px 18px rgba(216,30,61,0.4);transform:scale(1.08);
+  .date-node-dow{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:inherit;}
+  .date-node-day{font-family:'Teko',sans-serif;font-size:30px;line-height:1;color:#fff;font-weight:600;}
+  .date-node-month{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:inherit;}
+  .date-node-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:2px;}
+  .date-node:hover{border-color:var(--gold);color:#fff;transform:translateY(-4px);}
+  .date-node:active{transform:translateY(-1px) scale(0.96);}
+  .date-node.active{
+    background:linear-gradient(135deg,var(--crimson),var(--crimson-2));color:rgba(255,255,255,0.85);border-color:var(--crimson-2);
+    box-shadow:0 8px 20px rgba(216,30,61,0.4);transform:scale(1.08);
   }
-  .rm-month-pill.has-data::after{
-    content:'';position:absolute;bottom:7px;left:50%;transform:translateX(-50%);
-    width:4px;height:4px;border-radius:50%;background:var(--gold);transition:background .3s ease;
+  .date-node.active .date-node-day{color:#fff;}
+  .date-node.active .date-node-dot{background:#fff;}
+  .date-node.is-today{border-color:var(--gold);}
+  .date-node.is-today::after{
+    content:'TODAY';position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+    font-family:'Oswald',sans-serif;font-size:7px;letter-spacing:1px;color:var(--navy);
+    background:var(--gold);padding:1px 6px;border-radius:999px;white-space:nowrap;
   }
-  .rm-month-pill.active.has-data::after{background:#fff;}
 
   /* Practice/training scrimmages on the calendar — same crest-badge layout
      as .match-card (reuses .match-card-comp/.match-card-body/.match-card-
@@ -1431,15 +1451,15 @@
   .field textarea, .contact-icon, .map-box, .testi-card, .live-panel,
   .tourney-card, .tourney-tab-btn, .tourney-record-card, .lm-stat,
   .our-match-card, .bracket-note, .lonestar-sponsors span, .video-wrap,
-  .view-toggle-btn, .match-tab-btn{
-    border-radius:20px;
+  .view-toggle-btn, .match-tab-btn, .date-node{
+    border-radius:18px;
   }
   .news-card .img{border-radius:20px 20px 0 0;}
   .news-card.feature .img{border-radius:20px 20px 0 0;}
   .kit-card{border-radius:20px;overflow:hidden;}
   .lonestar-modal-head .close-x{border-radius:50%;}
   .news-card .img .tag, .match-status-pill, .match-live-pill, .match-result,
-  .tourney-status, .rm-month-pill, .rm-cal-scroll-btn, .calendar-nav-btn{
+  .tourney-status, .rm-cal-scroll-btn, .calendar-nav-btn{
     border-radius:9999px;
   }
 
@@ -1448,7 +1468,7 @@
      treatment, so they're left out here). */
   button:focus-visible, a:focus-visible, .filter-btn:focus-visible,
   .view-toggle-btn:focus-visible, .match-tab-btn:focus-visible,
-  .rm-month-pill:focus-visible, .tourney-tab-btn:focus-visible{
+  .date-node:focus-visible, .tourney-tab-btn:focus-visible{
     outline:2px solid var(--gold);outline-offset:3px;
   }
 </style>
@@ -1951,13 +1971,15 @@
       </div>
 
       <div id="fixturesCalendarView" style="display:none;">
-        <p style="color:var(--mist);font-size:13px;margin-bottom:20px;">The club's full schedule — competitive matches, practices and other ClubVerse activity, month by month.</p>
-        <div class="rm-cal-months-row">
-          <button class="rm-cal-scroll-btn" id="rmCalScrollLeft" type="button" aria-label="Scroll months left">←</button>
-          <div class="rm-cal-months" id="rmCalMonths"></div>
-          <button class="rm-cal-scroll-btn" id="rmCalScrollRight" type="button" aria-label="Scroll months right">→</button>
+        <p style="color:var(--mist);font-size:13px;margin-bottom:20px;">The club's full schedule — competitive matches, practices and other ClubVerse activity, date by date.</p>
+        <div class="date-timeline-wrap">
+          <button class="rm-cal-scroll-btn" id="dtScrollLeft" type="button" aria-label="Scroll dates left">←</button>
+          <div class="date-timeline-viewport" id="dateTimelineViewport">
+            <div class="date-timeline-track" id="dateTimelineTrack" role="listbox" aria-label="Match and practice dates" tabindex="0"></div>
+          </div>
+          <button class="rm-cal-scroll-btn" id="dtScrollRight" type="button" aria-label="Scroll dates right">→</button>
         </div>
-        <div class="match-grid" id="rmCalGrid"></div>
+        <div class="match-grid" id="dateFixturePreview"></div>
       </div>
     </div>
   </section>
@@ -3286,106 +3308,133 @@ function practiceCardHTML(g, index){
   `;
 }
 
-// Real Madrid's own /schedule page is a horizontal month-pill strip above a
-// grid of match cards for whichever month is selected — reusing our own
-// matchCardHTML() for the cards themselves so List and Calendar stay
-// visually identical, just grouped differently.
-let calSelectedMonthKey = null;
+// Real Madrid-style continuous date timeline: one node per real ClubVerse
+// date (a match or practice actually happened/is scheduled that day) riding
+// on a single unbroken rail, rather than the old month-pill strip. Reuses
+// matchCardHTML()/practiceCardHTML() below the timeline so the selected
+// date's card looks identical to every other card on the site.
+let dtSelectedDateKey = null;
 
-// A full continuous run of months — from the earliest month we actually
-// have ClubVerse data for, through December of next year — not just the
-// months that happen to have a game in them. Months with nothing yet still
-// get a pill; selecting one just shows a "coming soon" state instead of an
-// empty grid or a missing tab.
-function getCalendarMonthRange(){
-  const now = new Date();
-  let earliestMs = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+function dtDateKey(ms){
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getTimelineDates(){
+  const map = new Map();
   clubverseAllGames.forEach(g=>{
-    const d = new Date(g.date);
-    const monthStart = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
-    if(monthStart < earliestMs) earliestMs = monthStart;
+    const key = dtDateKey(g.date);
+    if(!map.has(key)) map.set(key, { key, date: new Date(g.date), games: [] });
+    map.get(key).games.push(g);
   });
-  const endMs = new Date(now.getFullYear() + 1, 11, 1).getTime();
-
-  const months = [];
-  const cursor = new Date(earliestMs);
-  while(cursor.getTime() <= endMs){
-    const year = cursor.getFullYear();
-    const month = cursor.getMonth();
-    const hasData = clubverseAllGames.some(g=>{
-      const d = new Date(g.date);
-      return d.getFullYear() === year && d.getMonth() === month;
-    });
-    months.push({ key:`${year}-${month}`, year, month, sortMs:cursor.getTime(), hasData });
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-  return months;
+  return Array.from(map.values()).sort((a,b)=>a.date - b.date);
 }
 
-function renderCalendarMonths(){
-  const container = document.getElementById('rmCalMonths');
-  if(!container) return;
-  const months = getCalendarMonthRange();
-  if(!months.length){ container.innerHTML = ''; return; }
+function renderDateTimeline(){
+  const track = document.getElementById('dateTimelineTrack');
+  if(!track) return;
+  const dates = getTimelineDates();
+  if(!dates.length){ track.innerHTML = ''; renderDateFixturePreview(dates); return; }
 
-  if(!calSelectedMonthKey || !months.some(m=>m.key === calSelectedMonthKey)){
-    const now = new Date();
-    const nowKey = `${now.getFullYear()}-${now.getMonth()}`;
-    calSelectedMonthKey = months.find(m=>m.key === nowKey)?.key || months[0].key;
+  const todayKey = dtDateKey(Date.now());
+  if(!dtSelectedDateKey || !dates.some(d=>d.key === dtSelectedDateKey)){
+    const upcoming = dates.find(d=>d.date.getTime() >= Date.now());
+    dtSelectedDateKey = (dates.find(d=>d.key===todayKey) || upcoming || dates[dates.length-1]).key;
   }
 
-  container.innerHTML = months.map(m=>{
-    const monthAbbrev = new Date(m.year, m.month, 1).toLocaleDateString('en-US', { month:'short' });
-    const label = `${monthAbbrev} '${String(m.year).slice(-2)}`;
-    const classes = ['rm-month-pill'];
-    if(m.key === calSelectedMonthKey) classes.push('active');
-    if(m.hasData) classes.push('has-data');
-    return `<button type="button" class="${classes.join(' ')}" data-key="${m.key}">${label}</button>`;
+  track.innerHTML = dates.map(d=>{
+    const dow = d.date.toLocaleDateString('en-US',{ weekday:'short' }).toUpperCase();
+    const mon = d.date.toLocaleDateString('en-US',{ month:'short' }).toUpperCase();
+    const classes = ['date-node'];
+    if(d.key === dtSelectedDateKey) classes.push('active');
+    if(d.key === todayKey) classes.push('is-today');
+    return `
+      <button type="button" class="${classes.join(' ')}" data-key="${d.key}" role="option" aria-selected="${d.key===dtSelectedDateKey}">
+        <span class="date-node-dow">${dow}</span>
+        <span class="date-node-day">${d.date.getDate()}</span>
+        <span class="date-node-month">${mon}</span>
+        <span class="date-node-dot"></span>
+      </button>`;
   }).join('');
 
-  container.querySelectorAll('.rm-month-pill').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      calSelectedMonthKey = btn.getAttribute('data-key');
-      renderCalendarMonths();
-      renderCalendarGrid();
-      btn.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
-    });
+  track.querySelectorAll('.date-node').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectTimelineDate(btn.getAttribute('data-key')));
   });
 
-  const activeBtn = container.querySelector('.rm-month-pill.active');
+  const activeBtn = track.querySelector('.date-node.active');
   if(activeBtn) activeBtn.scrollIntoView({ inline:'center', block:'nearest' });
+
+  renderDateFixturePreview(dates);
 }
 
-function renderCalendarGrid(){
-  const grid = document.getElementById('rmCalGrid');
-  if(!grid || !calSelectedMonthKey) return;
-  const [year, month] = calSelectedMonthKey.split('-').map(Number);
-  const games = clubverseAllGames
-    .filter(g=>{ const d = new Date(g.date); return d.getFullYear() === year && d.getMonth() === month; })
-    .sort((a,b)=>a.date - b.date);
+function selectTimelineDate(key, smooth){
+  dtSelectedDateKey = key;
+  renderDateTimeline();
+  if(smooth){
+    document.querySelector(`.date-node[data-key="${CSS.escape(key)}"]`)
+      ?.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+  }
+}
 
-  grid.classList.remove('stagger-fade-in');
-  void grid.offsetWidth; // restart the entrance animation on every re-render
-  if(!games.length){
-    const monthLabel = new Date(year, month, 1).toLocaleDateString('en-US', { month:'long', year:'numeric' });
-    grid.innerHTML = `
+function renderDateFixturePreview(dates){
+  const preview = document.getElementById('dateFixturePreview');
+  if(!preview) return;
+  const entry = dates.find(d=>d.key === dtSelectedDateKey);
+
+  preview.classList.remove('stagger-fade-in');
+  void preview.offsetWidth; // restart the entrance animation on every re-render
+
+  if(!entry || !entry.games.length){
+    const nextUpcoming = dates.find(d=>d.date.getTime() >= Date.now());
+    preview.innerHTML = `
       <div class="calendar-empty-state">
         <div class="calendar-empty-icon">📅</div>
-        <p>Match schedule coming soon</p>
-        <span>ClubVerse hasn't posted anything for ${monthLabel} yet — check back soon.</span>
+        <p>No fixtures scheduled</p>
+        <span>ClubVerse doesn't have anything posted for this date.</span>
+        ${nextUpcoming ? `<button type="button" class="btn btn-outline" id="jumpNextMatchday" style="margin-top:18px;">Jump To Next Matchday</button>` : ''}
       </div>`;
-    grid.classList.add('stagger-fade-in');
-    return;
+    document.getElementById('jumpNextMatchday')?.addEventListener('click', ()=> selectTimelineDate(nextUpcoming.key, true));
+  } else {
+    preview.innerHTML = entry.games.map((g,idx)=> isRealFixture(g) ? matchCardHTML(g,idx) : practiceCardHTML(g,idx)).join('');
   }
-  grid.innerHTML = games.map((g,idx)=> isRealFixture(g) ? matchCardHTML(g,idx) : practiceCardHTML(g,idx)).join('');
-  grid.classList.add('stagger-fade-in');
+  preview.classList.add('stagger-fade-in');
 }
 
-document.getElementById('rmCalScrollLeft')?.addEventListener('click', ()=>{
-  document.getElementById('rmCalMonths')?.scrollBy({ left:-160, behavior:'smooth' });
+// Native overflow-x scroll already gives touch/trackpad swipe for free —
+// this adds click-and-drag support for mouse/trackpad users, matching the
+// "drag-to-scroll" ask without fighting the browser's own touch handling.
+(function initTimelineDragScroll(){
+  const vp = document.getElementById('dateTimelineViewport');
+  if(!vp) return;
+  let isDown = false, dragged = false, startX = 0, startScroll = 0;
+  vp.addEventListener('mousedown', e=>{
+    isDown = true; dragged = false;
+    startX = e.pageX; startScroll = vp.scrollLeft;
+    vp.classList.add('dragging');
+  });
+  window.addEventListener('mouseup', ()=>{ isDown = false; vp.classList.remove('dragging'); });
+  window.addEventListener('mousemove', e=>{
+    if(!isDown) return;
+    const dx = e.pageX - startX;
+    if(Math.abs(dx) > 4) dragged = true;
+    vp.scrollLeft = startScroll - dx;
+  });
+  // Swallow the click that would otherwise fire on a node right after a drag.
+  vp.addEventListener('click', e=>{ if(dragged) e.stopPropagation(); }, true);
+})();
+
+document.getElementById('dateTimelineTrack')?.addEventListener('keydown', e=>{
+  if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  const dates = getTimelineDates();
+  const idx = dates.findIndex(d=>d.key === dtSelectedDateKey);
+  if(e.key === 'ArrowRight' && idx < dates.length - 1){ selectTimelineDate(dates[idx+1].key, true); e.preventDefault(); }
+  if(e.key === 'ArrowLeft' && idx > 0){ selectTimelineDate(dates[idx-1].key, true); e.preventDefault(); }
 });
-document.getElementById('rmCalScrollRight')?.addEventListener('click', ()=>{
-  document.getElementById('rmCalMonths')?.scrollBy({ left:160, behavior:'smooth' });
+
+document.getElementById('dtScrollLeft')?.addEventListener('click', ()=>{
+  document.getElementById('dateTimelineViewport')?.scrollBy({ left:-200, behavior:'smooth' });
+});
+document.getElementById('dtScrollRight')?.addEventListener('click', ()=>{
+  document.getElementById('dateTimelineViewport')?.scrollBy({ left:200, behavior:'smooth' });
 });
 document.querySelectorAll('#fixturesViewToggle .view-toggle-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -3395,8 +3444,7 @@ document.querySelectorAll('#fixturesViewToggle .view-toggle-btn').forEach(btn=>{
     document.getElementById('fixturesListView').style.display = view === 'list' ? '' : 'none';
     document.getElementById('fixturesCalendarView').style.display = view === 'calendar' ? '' : 'none';
     if(view === 'calendar'){
-      renderCalendarMonths();
-      renderCalendarGrid();
+      renderDateTimeline();
     }
   });
 });
@@ -3458,7 +3506,8 @@ loadClubverseGames();
 
 // Deep-linking from a news article's "View This Match" button
 // (?view=fixtures&game=<id>) — lands on Fixtures, switches to Calendar,
-// jumps to the right month, and glows the matching card once it renders.
+// jumps to that exact date on the timeline, and glows the matching card
+// once it renders.
 let pendingHighlightGameId = null;
 
 function tryHighlightPendingGame(){
@@ -3470,13 +3519,10 @@ function tryHighlightPendingGame(){
   const calBtn = document.querySelector('#fixturesViewToggle .view-toggle-btn[data-view="calendar"]');
   if(calBtn && !calBtn.classList.contains('active')) calBtn.click();
 
-  const d = new Date(game.date);
-  calSelectedMonthKey = `${d.getFullYear()}-${d.getMonth()}`;
-  renderCalendarMonths();
-  renderCalendarGrid();
+  selectTimelineDate(dtDateKey(game.date));
 
   setTimeout(()=>{
-    const card = document.querySelector(`#rmCalGrid [data-game-id="${CSS.escape(game.id)}"]`);
+    const card = document.querySelector(`#dateFixturePreview [data-game-id="${CSS.escape(game.id)}"]`);
     if(card){
       card.scrollIntoView({ behavior:'smooth', block:'center' });
       card.classList.add('game-highlight');
