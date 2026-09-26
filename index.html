@@ -3779,6 +3779,11 @@ function renderStandingsDetail(){
         const isUs = t.name === 'Irving Nepal FC';
         const gdC = t.gd > 0 ? 'pos' : t.gd < 0 ? 'neg' : '';
         const gdT = t.gd > 0 ? `+${t.gd}` : `${t.gd}`;
+        // ClubVerse's own standings pages only display W/L/GD/PTS, but they
+        // use standard 3-1-0 scoring — so Drawn (and therefore Played) is
+        // exactly derivable from real W and real PTS, not a guess.
+        const drawn = t.pts - (3 * t.won);
+        const played = t.won + drawn + t.lost;
         const crestUrl = isUs ? OUR_CREST_URL : findOpponentLogo(t.name);
         const crestHTML = crestUrl
           ? `<img class="standings-crest" src="${crestUrl}" alt="${t.name} crest">`
@@ -3788,7 +3793,7 @@ function renderStandingsDetail(){
           <div class="standings-row${isUs ? ' our-row' : ''}">
             <span class="st-col-pos">${i+1}</span>
             <span class="st-col-club">${crestHTML}<span>${t.name}</span></span>
-            <span>${t.won}</span><span>${t.lost}</span>
+            <span>${played}</span><span>${t.won}</span><span>${drawn}</span><span>${t.lost}</span>
             <span class="standings-gd ${gdC}">${gdT}</span>
             <span class="standings-pts">${t.pts}</span>
             <span class="st-col-form">${rowForm}</span>
@@ -3808,7 +3813,7 @@ function renderStandingsDetail(){
 
   const tableHeaderHTML = snapshot
     ? `<span class="st-col-pos">#</span><span class="st-col-club">Club</span>
-       <span>W</span><span>L</span><span>GD</span><span>PTS</span>
+       <span>P</span><span>W</span><span>D</span><span>L</span><span>GD</span><span>PTS</span>
        <span class="st-col-form">Last 5</span>`
     : `<span class="st-col-club">Club</span>
        <span>P</span><span>W</span><span>D</span><span>L</span>
