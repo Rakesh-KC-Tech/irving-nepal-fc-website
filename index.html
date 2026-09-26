@@ -1149,29 +1149,91 @@
   @media(max-width:1080px){.tourney-teaser-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:760px){.tourney-teaser-grid{grid-template-columns:1fr;}}
 
-  /* ClubVerse live data widget: per-tournament record card (match cards use .match-* above) */
-  .tourney-record-card{
-    background:var(--panel);border:1px solid var(--line);padding:20px 22px;margin-bottom:14px;
-    position:relative;overflow:hidden;transition:transform .3s ease, box-shadow .3s ease;
+  /* ===== STANDINGS: Real-Madrid-style competition switcher + table ===== */
+  /* Our own ClubVerse Partner API only ever gives us Irving Nepal FC's own
+     record per tournament — not the other clubs' stats, so this renders a
+     real, single-row "our club" table (never a fabricated full league
+     table) plus a prominent link to ClubVerse's own site, which already
+     has the real complete standings for every club, live. */
+  .standings-switcher{
+    display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:28px;padding-bottom:4px;
   }
-  .tourney-record-card:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(0,0,0,0.3);}
-  .tourney-record-card::before{
-    content:'';position:absolute;top:0;left:0;right:0;height:3px;
-    background:linear-gradient(90deg,var(--crimson),var(--gold));
+  .standings-switcher::-webkit-scrollbar{display:none;}
+  .standings-tab{
+    font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+    padding:11px 20px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--mist);
+    cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;white-space:nowrap;
   }
-  .tourney-record-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;}
-  .tourney-record-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:17px;display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
-  .tourney-record-meta{font-size:12px;color:var(--mist);margin-top:4px;}
-  .tourney-record-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;}
-  .tourney-stat{background:var(--navy-2);border:1px solid var(--line);padding:10px 6px;text-align:center;}
-  .tourney-stat b{display:block;font-family:'Teko',sans-serif;font-size:22px;color:#fff;}
-  .tourney-stat span{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mist);}
-  .tourney-record-link{
-    display:inline-block;margin-top:16px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:0.5px;
-    color:var(--gold);border-bottom:1px solid rgba(216,180,106,0.4);padding-bottom:2px;transition:color .2s;
+  .standings-tab:hover{border-color:var(--gold);color:#fff;transform:translateY(-2px);}
+  .standings-tab.active{
+    background:linear-gradient(135deg,var(--crimson),var(--crimson-2));color:#fff;border-color:var(--crimson-2);
+    box-shadow:0 6px 18px rgba(216,30,61,0.4);
   }
-  .tourney-record-link:hover{color:var(--crimson-2);border-color:var(--crimson-2);}
-  @media(max-width:760px){.tourney-record-stats{grid-template-columns:repeat(4,1fr);}}
+
+  .standings-card{
+    background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--mist-dim);
+    padding:26px 26px 22px;position:relative;overflow:hidden;
+  }
+  .standings-card[data-status="champion"]{border-left-color:var(--gold);}
+  .standings-card[data-status="live"]{border-left-color:var(--crimson-2);}
+  .standings-card-head{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:22px;}
+  .standings-card-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:19px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;}
+  .standings-card-meta{font-size:12px;color:var(--mist);margin-top:5px;}
+
+  .standings-table{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .standings-table-inner{display:table;width:100%;min-width:640px;border-collapse:separate;border-spacing:0 8px;}
+  .standings-table-header, .standings-row{display:table-row;}
+  .standings-table-header > span, .standings-row > span{
+    display:table-cell;vertical-align:middle;padding:0 10px;
+  }
+  .standings-table-header{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mist-dim);}
+  .standings-table-header > span{padding-bottom:8px;}
+  .st-col-club{text-align:left;min-width:220px;position:sticky;left:0;background:var(--panel);z-index:1;}
+  .standings-table-header span:not(.st-col-club):not(.st-col-form){text-align:center;width:52px;}
+  .standings-row{
+    background:var(--navy-2);transition:transform .3s ease, box-shadow .3s ease, background .3s ease;
+  }
+  .standings-row:hover{transform:translateY(-2px) scale(1.005);box-shadow:0 10px 24px rgba(0,0,0,0.35);}
+  .standings-row.our-row{
+    background:linear-gradient(90deg, rgba(216,30,61,0.16), rgba(216,30,61,0.05));
+    box-shadow:inset 0 0 0 1px rgba(216,30,61,0.35);
+  }
+  .standings-row > span{padding-top:14px;padding-bottom:14px;text-align:center;font-family:'Teko',sans-serif;font-size:19px;color:#fff;}
+  .standings-row .st-col-club{
+    text-align:left;font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:#fff;
+    background:transparent;display:flex;align-items:center;gap:10px;
+  }
+  .standings-row.our-row .st-col-club{background:#152048;}
+  .standings-crest{width:30px;height:30px;object-fit:contain;flex-shrink:0;}
+  .you-badge{
+    font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:1px;color:var(--navy);
+    background:var(--gold);padding:2px 7px;border-radius:999px;
+  }
+  .standings-gd.pos{color:#4ade80;}
+  .standings-gd.neg{color:var(--crimson-2);}
+  .st-col-form{text-align:left !important;min-width:170px;}
+  .form-pill-row{display:flex;gap:5px;}
+  .form-pill{
+    width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+    font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;color:#fff;cursor:default;
+    transition:transform .2s ease;
+  }
+  .form-pill:hover{transform:scale(1.2);}
+  .form-pill.W{background:#2fa365;}
+  .form-pill.D{background:var(--mist-dim);}
+  .form-pill.L{background:var(--crimson);}
+
+  .standings-cta{
+    display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-family:'Oswald',sans-serif;
+    font-size:12px;letter-spacing:0.5px;color:var(--gold);border-bottom:1px solid rgba(216,180,106,0.4);
+    padding-bottom:2px;transition:color .2s;
+  }
+  .standings-cta:hover{color:var(--crimson-2);border-color:var(--crimson-2);}
+  .standings-empty{text-align:center;padding:50px 20px;color:var(--mist);font-size:14px;}
+  @media(max-width:760px){
+    .standings-card{padding:20px 18px 18px;}
+    .st-col-club{min-width:170px;}
+  }
 
   /* Photo lightbox — full-screen enlarge for Gallery images */
   .lightbox-overlay{
@@ -1449,7 +1511,7 @@
   .staff-card, .cv-member-card, .practice-card, .calendar-empty-state,
   .product-card, .kit-card, .plan-card, .field input, .field select,
   .field textarea, .contact-icon, .map-box, .testi-card, .live-panel,
-  .tourney-card, .tourney-tab-btn, .tourney-record-card, .lm-stat,
+  .tourney-card, .tourney-tab-btn, .standings-card, .lm-stat,
   .our-match-card, .bracket-note, .lonestar-sponsors span, .video-wrap,
   .view-toggle-btn, .match-tab-btn, .date-node{
     border-radius:18px;
@@ -1468,7 +1530,7 @@
      treatment, so they're left out here). */
   button:focus-visible, a:focus-visible, .filter-btn:focus-visible,
   .view-toggle-btn:focus-visible, .match-tab-btn:focus-visible,
-  .date-node:focus-visible, .tourney-tab-btn:focus-visible{
+  .date-node:focus-visible, .tourney-tab-btn:focus-visible, .standings-tab:focus-visible{
     outline:2px solid var(--gold);outline-offset:3px;
   }
 </style>
@@ -2000,7 +2062,9 @@
     <div class="wrap">
       <div class="eyebrow" style="margin-bottom:16px;">Tournament Record — Live From ClubVerse</div>
       <div class="hero-stats" id="tourneyStatsRow" style="margin-bottom:36px;"></div>
-      <div id="tourneyHistoryList" style="margin-bottom:12px;"></div>
+
+      <div class="standings-switcher" id="standingsSwitcher"></div>
+      <div id="standingsDetail"></div>
     </div>
   </section>
 
@@ -3498,6 +3562,9 @@ async function loadClubverseGames(){
     renderFixturesTab();
     populateLonestarModal();
     tryHighlightPendingGame();
+    // Re-render the standings "Last 5" form guide too, in case tournament
+    // data (which the form lookup depends on) finished loading first.
+    if(document.getElementById('standingsDetail')) renderStandingsDetail();
   }catch(e){
     if(homeSection) homeSection.style.display = 'none';
   }
@@ -3557,38 +3624,122 @@ async function loadClubverseMatchVideos(){
 }
 loadClubverseMatchVideos();
 
-function tournamentHistoryRowHTML(row, index){
+// Real Madrid-style standings: a competition switcher (one pill per real
+// ClubVerse tournament) above a single elite table row for Irving Nepal FC.
+// The Partner API only ever gives us OUR OWN record per tournament — not
+// the other clubs' — so this never fabricates a full league table; it
+// shows our real row plus a prominent link to ClubVerse's own site, which
+// already has the real complete standings for every club, live.
+let standingsSelectedTournamentId = null;
+
+function getRealFormForTournament(tournamentId){
+  return clubverseAllGames
+    .filter(g => g.tournamentId === tournamentId && g.status === 'completed' && g.result != null)
+    .sort((a,b) => a.date - b.date)
+    .slice(-5)
+    .map(g => {
+      const weAreHome = g.home.name === 'Irving Nepal FC';
+      const oppName = weAreHome ? g.away.name : g.home.name;
+      const ourScore = weAreHome ? g.home.score : g.away.score;
+      const theirScore = weAreHome ? g.away.score : g.home.score;
+      const score = `${ourScore ?? 0}–${theirScore ?? 0}`;
+      const dateStr = new Date(g.date).toLocaleDateString('en-US',{ month:'short', day:'numeric' });
+      return { result: g.result, title: `vs ${oppName} · ${score} · ${dateStr}` };
+    });
+}
+
+function renderStandingsSwitcher(){
+  const el = document.getElementById('standingsSwitcher');
+  if(!el) return;
+  if(!clubverseTournamentHistory.length){ el.innerHTML = ''; return; }
+
+  if(!standingsSelectedTournamentId || !clubverseTournamentHistory.some(t=>t.tournamentId === standingsSelectedTournamentId)){
+    const ongoing = clubverseTournamentHistory.find(t => t.status && t.status !== 'COMPLETED');
+    standingsSelectedTournamentId = (ongoing || clubverseTournamentHistory[0]).tournamentId;
+  }
+
+  el.innerHTML = clubverseTournamentHistory.map(t=>{
+    const active = t.tournamentId === standingsSelectedTournamentId ? ' active' : '';
+    return `<button type="button" class="standings-tab${active}" data-id="${t.tournamentId}">${t.tournamentName}</button>`;
+  }).join('');
+
+  el.querySelectorAll('.standings-tab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      standingsSelectedTournamentId = btn.getAttribute('data-id');
+      renderStandingsSwitcher();
+    });
+  });
+
+  renderStandingsDetail();
+}
+
+function renderStandingsDetail(){
+  const el = document.getElementById('standingsDetail');
+  if(!el) return;
+  const row = clubverseTournamentHistory.find(t => t.tournamentId === standingsSelectedTournamentId);
+  el.classList.remove('stagger-fade-in');
+  void el.offsetWidth;
+  if(!row){
+    el.innerHTML = '<div class="standings-empty">No tournament history yet.</div>';
+    el.classList.add('stagger-fade-in');
+    return;
+  }
+
   const r = row.record;
-  const goalDiff = r.goalsFor - r.goalsAgainst;
-  const champBadge = row.champion ? '<span class="tourney-status st-live"><span class="dot"></span>Champion</span>' : '';
-  const ongoingBadge = row.status && row.status !== 'COMPLETED'
-    ? '<span class="tourney-status st-upcoming"><span class="dot"></span>Ongoing</span>' : '';
+  const gd = r.goalsFor - r.goalsAgainst;
+  const gdClass = gd > 0 ? 'pos' : gd < 0 ? 'neg' : '';
+  const gdText = gd > 0 ? `+${gd}` : `${gd}`;
+  const isLive = row.status && row.status !== 'COMPLETED';
+  const status = row.champion ? 'champion' : isLive ? 'live' : 'completed';
+  const statusBadge = row.champion
+    ? '<span class="tourney-status st-live"><span class="dot"></span>Champion</span>'
+    : isLive
+      ? '<span class="tourney-status st-upcoming"><span class="dot"></span>Ongoing</span>'
+      : '<span class="tourney-status st-completed"><span class="dot"></span>Completed</span>';
   const startText = row.startDate ? new Date(row.startDate).toLocaleDateString('en-US', { month:'short', year:'numeric' }) : '';
   const metaParts = [row.categoryName, row.stage, startText].filter(Boolean);
-  const aos = index != null ? ` data-aos="fade-up" data-aos-delay="${(index%5)*80}"` : '';
-  return `
-    <div class="tourney-record-card"${aos}>
-      <div class="tourney-record-head">
+
+  const form = getRealFormForTournament(row.tournamentId);
+  const formHTML = form.length
+    ? `<div class="form-pill-row">${form.map(f => `<span class="form-pill ${f.result}" title="${f.title}">${f.result}</span>`).join('')}</div>`
+    : '<span style="color:var(--mist-dim);font-size:12px;">—</span>';
+
+  el.innerHTML = `
+    <div class="standings-card" data-status="${status}">
+      <div class="standings-card-head">
         <div>
-          <div class="tourney-record-name">${row.tournamentName}${champBadge}${ongoingBadge}</div>
-          <div class="tourney-record-meta">${metaParts.join(' · ')}</div>
+          <div class="standings-card-name">${row.tournamentName}</div>
+          <div class="standings-card-meta">${metaParts.join(' · ')}</div>
+        </div>
+        ${statusBadge}
+      </div>
+      <div class="standings-table">
+        <div class="standings-table-inner">
+          <div class="standings-table-header">
+            <span class="st-col-club">Club</span>
+            <span>P</span><span>W</span><span>D</span><span>L</span>
+            <span>GF</span><span>GA</span><span>GD</span>
+            <span class="st-col-form">Last 5</span>
+          </div>
+          <div class="standings-row our-row">
+            <span class="st-col-club">
+              <img class="standings-crest" src="${OUR_CREST_URL}" alt="Irving Nepal FC crest">
+              Irving Nepal FC <span class="you-badge">YOU</span>
+            </span>
+            <span>${r.played}</span><span>${r.won}</span><span>${r.drawn}</span><span>${r.lost}</span>
+            <span>${r.goalsFor}</span><span>${r.goalsAgainst}</span>
+            <span class="standings-gd ${gdClass}">${gdText}</span>
+            <span class="st-col-form">${formHTML}</span>
+          </div>
         </div>
       </div>
-      <div class="tourney-record-stats">
-        <div class="tourney-stat"><b>${r.played}</b><span>Played</span></div>
-        <div class="tourney-stat"><b>${r.won}</b><span>Won</span></div>
-        <div class="tourney-stat"><b>${r.drawn}</b><span>Drawn</span></div>
-        <div class="tourney-stat"><b>${r.lost}</b><span>Lost</span></div>
-        <div class="tourney-stat"><b>${r.goalsFor}</b><span>Goals For</span></div>
-        <div class="tourney-stat"><b>${r.goalsAgainst}</b><span>Goals Against</span></div>
-        <div class="tourney-stat"><b>${goalDiff > 0 ? '+' : ''}${goalDiff}</b><span>Goal Diff.</span></div>
-      </div>
       ${row.publicSlug ? `
-      <a href="https://clubverseapp.com/t/${row.publicSlug}" target="_blank" rel="noopener" class="tourney-record-link">
-        View Full Standings &amp; Bracket on ClubVerse <span class="btn-arrow">→</span>
+      <a href="https://clubverseapp.com/t/${row.publicSlug}" target="_blank" rel="noopener" class="standings-cta">
+        View Full Live Standings &amp; Bracket on ClubVerse <span class="btn-arrow">→</span>
       </a>` : ''}
     </div>
   `;
+  el.classList.add('stagger-fade-in');
 }
 
 async function loadClubverseTournaments(){
@@ -3620,12 +3771,7 @@ async function loadClubverseTournaments(){
         <div class="legacy-stat"><b>${c.goalsFor}</b><span>Goals Scored</span></div>
       `;
     }
-    const historyEl = document.getElementById('tourneyHistoryList');
-    if(historyEl){
-      historyEl.innerHTML = clubverseTournamentHistory.length
-        ? clubverseTournamentHistory.map(tournamentHistoryRowHTML).join('')
-        : '<p class="news-empty">No tournament history yet.</p>';
-    }
+    renderStandingsSwitcher();
     populateLonestarModal();
   }catch(e){}
 }
