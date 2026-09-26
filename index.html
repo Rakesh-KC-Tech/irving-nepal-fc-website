@@ -1205,13 +1205,19 @@
   }
   .standings-row.our-row .st-col-club{background:#152048;}
   .standings-crest{width:30px;height:30px;object-fit:contain;flex-shrink:0;}
-  .you-badge{
-    font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:1px;color:var(--navy);
-    background:var(--gold);padding:2px 7px;border-radius:999px;
+  .standings-crest-mono{
+    display:inline-flex;align-items:center;justify-content:center;background:var(--navy-3);
+    border:1px solid var(--line);border-radius:50%;font-family:'Oswald',sans-serif;font-size:9px;
+    font-weight:700;color:var(--mist);
   }
   .standings-gd.pos{color:#4ade80;}
   .standings-gd.neg{color:var(--crimson-2);}
   .st-col-form{text-align:left !important;min-width:170px;}
+  .st-col-pos{color:var(--mist);font-family:'Teko',sans-serif;font-size:19px;}
+  .standings-table-header .st-col-pos{color:var(--mist-dim);width:34px !important;}
+  .standings-row .st-col-pos{width:34px;}
+  .standings-pts{font-weight:700;font-size:22px !important;color:var(--gold) !important;}
+  .standings-snapshot-note{margin-top:14px;font-size:11px;color:var(--mist-dim);line-height:1.6;}
   .form-pill-row{display:flex;gap:5px;}
   .form-pill{
     width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
@@ -3189,6 +3195,67 @@ const CLUBVERSE_OPPONENT_LOGOS = {
 function findOpponentLogo(name){
   return CLUBVERSE_OPPONENT_LOGOS[(name||'').toLowerCase().trim().replace(/\s+/g,' ')] || null;
 }
+
+// ClubVerse's Partner API only ever gives us Irving Nepal FC's own record
+// per tournament, never the other clubs' — the real complete standings
+// only exist on ClubVerse's own public tournament pages, which are a
+// client-rendered app (no simple/stable way to auto-scrape). So this is a
+// manually-pulled real snapshot of each tournament's actual table, same
+// approach as CLUBVERSE_OPPONENT_LOGOS above — needs a manual refresh
+// after matchdays rather than updating live. Every row here is real; W/L/
+// GD/PTS match exactly what ClubVerse's own site displays (they don't
+// surface a separate "Drawn" column either — a draw is only reflected via
+// PTS not matching win-count × 3).
+const MANUAL_STANDINGS_SNAPSHOTS = {
+  '8aOlpvO6Pj72ModK8w5c': { // 4th Lonestar Cup 2026
+    asOf: '2026-09-25', groupLabel: 'Open Division · Group C',
+    teams: [
+      { name:'Khukuri FC', won:2, lost:0, gd:8, pts:6 },
+      { name:'ERFC SPOT', won:2, lost:0, gd:7, pts:6 },
+      { name:'Irving Nepal FC', won:0, lost:2, gd:-6, pts:0 },
+      { name:'Chandra Surya FC', won:0, lost:2, gd:-9, pts:0 },
+    ]
+  },
+  'm6FbF0q8RkPbk5vHH5x8': { // RSA Cup
+    asOf: '2026-09-25', groupLabel: 'Group Stage',
+    teams: [
+      { name:'Euless Royal Football Club', won:2, lost:0, gd:7, pts:6 },
+      { name:'Irving Nepal FC', won:0, lost:1, gd:-1, pts:1 },
+      { name:'Blackthorn United', won:0, lost:1, gd:-6, pts:1 },
+    ]
+  },
+  'IPzokgfaaCyTbkSBE7yr': { // Haslet Super League S1
+    asOf: '2026-09-25', groupLabel: 'Regular Season · Group Stage',
+    teams: [
+      { name:'FortWorth Rising Star FC', won:3, lost:0, gd:9, pts:10 },
+      { name:'Euless Royal Football Club', won:2, lost:1, gd:10, pts:7 },
+      { name:'Back Again FC', won:2, lost:2, gd:2, pts:6 },
+      { name:'Irving Nepal FC', won:1, lost:2, gd:-3, pts:4 },
+      { name:'Royal United FC', won:1, lost:2, gd:-7, pts:4 },
+      { name:'Peak FC', won:0, lost:2, gd:-11, pts:2 },
+    ]
+  },
+  'jEg3scFVNPVFFvUXb5b0': { // Fundraiser Cup
+    asOf: '2026-09-25', groupLabel: 'Group D',
+    teams: [
+      { name:'Goal Buster FC', won:2, lost:0, gd:5, pts:6 },
+      { name:'Jhapa XI FC', won:1, lost:1, gd:1, pts:3 },
+      { name:'FortWorth Rising Star FC', won:0, lost:1, gd:-2, pts:1 },
+      { name:'Irving Nepal FC', won:0, lost:1, gd:-4, pts:1 },
+    ]
+  },
+  'm8j5ovHATxiKmmDu8F19': { // Nepali 35+ Sunday Soccer League
+    asOf: '2026-09-25', groupLabel: 'Group Stage',
+    teams: [
+      { name:'Dfw himalayas fc', won:5, lost:0, gd:18, pts:15 },
+      { name:'Euless Royal FC', won:3, lost:1, gd:6, pts:10 },
+      { name:'Parvat FC', won:3, lost:2, gd:-3, pts:9 },
+      { name:'Irving Nepal FC', won:1, lost:3, gd:-7, pts:4 },
+      { name:'D-Town FC', won:1, lost:4, gd:-3, pts:3 },
+      { name:'FortWorth Rising Star FC', won:1, lost:4, gd:-11, pts:3 },
+    ]
+  },
+};
 // "Team A" / "Team B" / "Our Team" are internal squad-split labels ClubVerse
 // uses for scrimmages — both sides are Irving Nepal FC players, not a real
 // opponent, so both get the real club crest rather than a monogram.
@@ -3704,6 +3771,53 @@ function renderStandingsDetail(){
     ? `<div class="form-pill-row">${form.map(f => `<span class="form-pill ${f.result}" title="${f.title}">${f.result}</span>`).join('')}</div>`
     : '<span style="color:var(--mist-dim);font-size:12px;">—</span>';
 
+  const snapshot = MANUAL_STANDINGS_SNAPSHOTS[row.tournamentId];
+
+  const tableRowsHTML = snapshot
+    ? [...snapshot.teams].sort((a,b) => b.pts - a.pts).map((t, i)=>{
+        const isUs = t.name === 'Irving Nepal FC';
+        const gdC = t.gd > 0 ? 'pos' : t.gd < 0 ? 'neg' : '';
+        const gdT = t.gd > 0 ? `+${t.gd}` : `${t.gd}`;
+        const crestUrl = isUs ? OUR_CREST_URL : findOpponentLogo(t.name);
+        const crestHTML = crestUrl
+          ? `<img class="standings-crest" src="${crestUrl}" alt="${t.name} crest">`
+          : `<span class="standings-crest standings-crest-mono">${initialsFor(t.name)}</span>`;
+        const rowForm = isUs ? formHTML : '<span style="color:var(--mist-dim);font-size:12px;">—</span>';
+        return `
+          <div class="standings-row${isUs ? ' our-row' : ''}">
+            <span class="st-col-pos">${i+1}</span>
+            <span class="st-col-club">${crestHTML}<span>${t.name}</span></span>
+            <span>${t.won}</span><span>${t.lost}</span>
+            <span class="standings-gd ${gdC}">${gdT}</span>
+            <span class="standings-pts">${t.pts}</span>
+            <span class="st-col-form">${rowForm}</span>
+          </div>`;
+      }).join('')
+    : `
+      <div class="standings-row our-row">
+        <span class="st-col-club">
+          <img class="standings-crest" src="${OUR_CREST_URL}" alt="Irving Nepal FC crest">
+          Irving Nepal FC
+        </span>
+        <span>${r.played}</span><span>${r.won}</span><span>${r.drawn}</span><span>${r.lost}</span>
+        <span>${r.goalsFor}</span><span>${r.goalsAgainst}</span>
+        <span class="standings-gd ${gdClass}">${gdText}</span>
+        <span class="st-col-form">${formHTML}</span>
+      </div>`;
+
+  const tableHeaderHTML = snapshot
+    ? `<span class="st-col-pos">#</span><span class="st-col-club">Club</span>
+       <span>W</span><span>L</span><span>GD</span><span>PTS</span>
+       <span class="st-col-form">Last 5</span>`
+    : `<span class="st-col-club">Club</span>
+       <span>P</span><span>W</span><span>D</span><span>L</span>
+       <span>GF</span><span>GA</span><span>GD</span>
+       <span class="st-col-form">Last 5</span>`;
+
+  const snapshotNote = snapshot
+    ? `<p class="standings-snapshot-note">Standings snapshot as of ${new Date(snapshot.asOf).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}${snapshot.groupLabel ? ' · ' + snapshot.groupLabel : ''} — live standings on ClubVerse may have changed since.</p>`
+    : '';
+
   el.innerHTML = `
     <div class="standings-card" data-status="${status}">
       <div class="standings-card-head">
@@ -3714,25 +3828,12 @@ function renderStandingsDetail(){
         ${statusBadge}
       </div>
       <div class="standings-table">
-        <div class="standings-table-inner">
-          <div class="standings-table-header">
-            <span class="st-col-club">Club</span>
-            <span>P</span><span>W</span><span>D</span><span>L</span>
-            <span>GF</span><span>GA</span><span>GD</span>
-            <span class="st-col-form">Last 5</span>
-          </div>
-          <div class="standings-row our-row">
-            <span class="st-col-club">
-              <img class="standings-crest" src="${OUR_CREST_URL}" alt="Irving Nepal FC crest">
-              Irving Nepal FC <span class="you-badge">YOU</span>
-            </span>
-            <span>${r.played}</span><span>${r.won}</span><span>${r.drawn}</span><span>${r.lost}</span>
-            <span>${r.goalsFor}</span><span>${r.goalsAgainst}</span>
-            <span class="standings-gd ${gdClass}">${gdText}</span>
-            <span class="st-col-form">${formHTML}</span>
-          </div>
+        <div class="standings-table-inner${snapshot ? ' has-pos' : ''}">
+          <div class="standings-table-header">${tableHeaderHTML}</div>
+          ${tableRowsHTML}
         </div>
       </div>
+      ${snapshotNote}
       ${row.publicSlug ? `
       <a href="https://clubverseapp.com/t/${row.publicSlug}" target="_blank" rel="noopener" class="standings-cta">
         View Full Live Standings &amp; Bracket on ClubVerse <span class="btn-arrow">→</span>
